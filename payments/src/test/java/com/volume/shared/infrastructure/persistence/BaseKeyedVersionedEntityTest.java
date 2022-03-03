@@ -35,6 +35,7 @@ interface SimpleKeyedVersionedEntityRepository extends BaseKeyedVersionedEntityR
 @ContextConfiguration(classes = PaymentsApplication.class)
 @DataJpaTest
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
+// does not require @DirtiesContext because it works on its own type and repository
 class BaseKeyedVersionedEntityTest {
 
     @Autowired
