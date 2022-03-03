@@ -4,3 +4,8 @@
 
 I had problems running integration tests with expected location, so I just moved it for now.
 
+## Add tests for optimistic locking to base aggregate and entity classes
+
+
+
+
