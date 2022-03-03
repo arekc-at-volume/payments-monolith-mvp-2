@@ -47,6 +47,11 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- testing -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-testing</artifactId>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
