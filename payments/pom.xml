@@ -13,6 +13,10 @@
     <name>payments</name>
     <description>payments</description>
 
+    <properties>
+        <java-faker.version>1.0.2</java-faker.version>
+    </properties>
+
     <dependencies>
         <!-- spring boot -->
         <dependency>
@@ -46,12 +50,22 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.0.1-jre</version>
+        </dependency>
 
         <!-- testing -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-testing</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.javafaker</groupId>-->
+<!--            <artifactId>javafaker</artifactId>-->
+<!--            <version>${java-faker.version}</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <dependencyManagement>

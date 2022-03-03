@@ -27,8 +27,8 @@ class JpaUserRepositoryTest {
 
     @Test
     void usersRepositoryIsAbleToReturnAllUsers() {
-        var shopper = new ShopperAggregate(UserId.random(), UserId.random());
-        var merchant = new MerchantAggregate(UserId.random(), UserId.random(), "secret");
+        var shopper = new ShopperAggregate(UserId.Companion.random(), UserId.Companion.random());
+        var merchant = MerchantAggregate.randomForTest().build();
         doInJPA(() -> emf, em -> {
             em.persist(shopper);
             em.persist(merchant);
@@ -39,6 +39,5 @@ class JpaUserRepositoryTest {
         assertThat(users.size()).isEqualTo(2);
         assertThat(users).contains(shopper, merchant);
     }
-
 
 }

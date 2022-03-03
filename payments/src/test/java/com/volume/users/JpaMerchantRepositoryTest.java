@@ -30,7 +30,7 @@ class JpaMerchantRepositoryTest {
     @Test
     void saveNewInstance() {
         // arrange
-        var newInstance = new MerchantAggregate(new UserId(UUID.randomUUID()), new UserId(UUID.randomUUID()), "client-secret");
+        var newInstance = MerchantAggregate.randomForTest().build();
 
         // act
         merchantRepository.save(newInstance);
@@ -48,7 +48,7 @@ class JpaMerchantRepositoryTest {
     @Test
     void merchantAggregateCanBeLoadedViaMerchantRepository() {
         // arrange
-        var newInstance = new MerchantAggregate(new UserId(UUID.randomUUID()), new UserId(UUID.randomUUID()), "client-secret");
+        var newInstance = MerchantAggregate.randomForTest().build();
         doInJPA(() -> emf, em -> {
             em.persist(newInstance);
         });
@@ -62,7 +62,7 @@ class JpaMerchantRepositoryTest {
     @Test
     void merchantAggregateCanBeLoadedViaUsersRepository() {
         // arrange
-        var newInstance = new MerchantAggregate(new UserId(UUID.randomUUID()), new UserId(UUID.randomUUID()), "client-secret");
+        var newInstance = MerchantAggregate.randomForTest().build();
         doInJPA(() -> emf, em -> {
             em.persist(newInstance);
         });
@@ -76,7 +76,9 @@ class JpaMerchantRepositoryTest {
     @Test
     void updateCausesVersionToBeIncremented() {
         // arrange
-        var newInstance = new MerchantAggregate(new UserId(UUID.randomUUID()), new UserId(UUID.randomUUID()), "client-secret");
+        var newInstance = MerchantAggregate.randomForTest()
+                .clientSecret("client-secret")
+                .build();
         doInJPA(() -> emf, em -> {
             em.persist(newInstance);
         });
