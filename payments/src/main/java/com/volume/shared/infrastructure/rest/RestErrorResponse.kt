@@ -1,6 +1,6 @@
 package com.example.aggregatedemojava.utilities.infrastructure.rest
 
-import com.volume.payments.shared.domain.DomainException
+import com.volume.shared.domain.DomainException
 import org.springframework.cloud.sleuth.Tracer
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

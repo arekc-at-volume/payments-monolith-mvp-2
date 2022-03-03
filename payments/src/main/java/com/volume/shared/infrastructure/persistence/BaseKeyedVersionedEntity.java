@@ -1,6 +1,5 @@
-package com.volume.payments.shared.infrastructure.persistence;
+package com.volume.shared.infrastructure.persistence;
 
-import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.Id;

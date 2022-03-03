@@ -1,6 +1,6 @@
-package com.volume.payments.shared.infrastructure.persistence;
+package com.volume.shared.infrastructure.persistence;
 
-import com.volume.payments.PaymentsApplication;
+import com.volume.PaymentsApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

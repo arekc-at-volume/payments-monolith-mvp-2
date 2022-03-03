@@ -1,4 +1,4 @@
-package com.volume.payments.shared.infrastructure.persistence;
+package com.volume.shared.infrastructure.persistence;
 
 import lombok.*;
 import org.junit.jupiter.api.Test;

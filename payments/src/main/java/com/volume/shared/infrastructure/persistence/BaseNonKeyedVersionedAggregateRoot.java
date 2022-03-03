@@ -1,4 +1,4 @@
-package com.volume.payments.shared.infrastructure.persistence;
+package com.volume.shared.infrastructure.persistence;
 
 import lombok.ToString;
 import org.springframework.data.domain.AfterDomainEventPublication;

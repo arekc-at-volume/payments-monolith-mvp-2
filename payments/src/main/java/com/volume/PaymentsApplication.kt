@@ -1,4 +1,4 @@
-package com.volume.payments
+package com.volume
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

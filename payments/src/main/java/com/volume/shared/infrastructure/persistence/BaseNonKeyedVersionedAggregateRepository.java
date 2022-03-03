@@ -1,4 +1,4 @@
-package com.volume.payments.shared.infrastructure.persistence;
+package com.volume.shared.infrastructure.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -6,7 +6,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 import java.io.Serializable;
 
 @NoRepositoryBean
-public interface BaseKeyedVersionedAggregateRepository<Aggregate extends BaseKeyedVersionedAggregateRoot<PK>, PK extends Serializable>
+public interface BaseNonKeyedVersionedAggregateRepository<Aggregate extends BaseNonKeyedVersionedAggregateRoot, PK extends Serializable>
         extends JpaRepository<Aggregate, PK> {
 }
-
