@@ -1,6 +1,5 @@
 package com.volume.users;
 
-import com.example.aggregatedemojava.utilities.infrastructure.rest.RestErrorResponse;
 import com.google.common.base.Preconditions;
 import com.volume.shared.domain.messages.CreateMerchantCommand;
 import com.volume.shared.domain.messages.MerchantCreatedEvent;
@@ -8,6 +7,7 @@ import com.volume.shared.domain.types.EmailAddress;
 import com.volume.shared.domain.types.PhoneNumber;
 import com.volume.shared.domain.types.UserId;
 import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedAggregateRoot;
+import com.volume.shared.infrastructure.rest.RestErrorResponse;
 import com.volume.users.exceptions.MerchantNotFoundException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -19,11 +19,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 
 import static java.lang.String.format;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Value
+@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 class CreateMerchantRequestDto {
     private final String companyName;
     private final String email;
@@ -41,7 +44,7 @@ class CreateMerchantRequestDto {
 
     public static CreateMerchantRequestDto forTest() {
         return new CreateMerchantRequestDto(
-                "company ABC",
+                "company ABC" + new Random().nextInt(),
                 EmailAddress.fromString("boss@company.com").toString(),
                 PhoneNumber.fromString("123456789").toString(),
                 MerchantPayeeDetailsDto.forTest()
@@ -68,6 +71,8 @@ enum AccountIdentificationType {
 }
 
 @Value
+@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 class AccountIdentificationDto {
     private final AccountIdentificationType type;
     private final String number;
@@ -98,6 +103,8 @@ enum AddressType {
 }
 
 @Value
+@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 class PostalAddressDto {
     private final String addressLine;
     private final AddressType addressType;
@@ -219,7 +226,7 @@ class MerchantsController {
      */
     @ExceptionHandler(MerchantNotFoundException.class)
     ResponseEntity<RestErrorResponse> handle(MerchantNotFoundException exception) {
-        return RestErrorResponse.Companion.fromException(HttpStatus.NOT_FOUND, exception, tracer);
+        return RestErrorResponse.fromException(HttpStatus.NOT_FOUND, exception, tracer);
     }
 
 }

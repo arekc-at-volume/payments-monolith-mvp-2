@@ -1,5 +1,6 @@
 package com.volume.users;
 
+import com.google.common.base.Preconditions;
 import com.volume.shared.domain.messages.CreateMerchantCommand;
 import com.volume.shared.domain.messages.MerchantCreatedEvent;
 import com.volume.shared.domain.types.EmailAddress;
@@ -104,9 +105,10 @@ class MerchantPayeeDetailsEntity extends BaseKeyedVersionedEntity<UserId> {
 }
 
 @Entity
-@Getter
+@Getter // TODO: how can we not expose these getters? How can we assert in tests and map between layers without it?
 class MerchantAggregate extends UserEntity {
     private String clientSecret;
+    private String companyName;
     private EmailAddress emailAddress;
     private PhoneNumber phoneNumber;
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "merchant")
@@ -116,11 +118,20 @@ class MerchantAggregate extends UserEntity {
         super();
     }
 
+    @Builder
     protected MerchantAggregate(
-            UserId id, UserId updatedBy, String clientSecret, EmailAddress emailAddress, PhoneNumber phoneNumber,
+            UserId id, UserId updatedBy, String clientSecret,
+            String companyName, EmailAddress emailAddress, PhoneNumber phoneNumber,
             MerchantPayeeDetailsEntity merchantPayeeDetails) {
         super(id, updatedBy);
+
+        Preconditions.checkNotNull(clientSecret);
+        Preconditions.checkNotNull(companyName);
+        Preconditions.checkNotNull(emailAddress);
+        Preconditions.checkNotNull(phoneNumber);
+
         this.clientSecret = clientSecret;
+        this.companyName = companyName;
         this.emailAddress = emailAddress;
         this.phoneNumber = phoneNumber;
         this.merchantPayeeDetails = merchantPayeeDetails;
@@ -137,9 +148,11 @@ class MerchantAggregate extends UserEntity {
      */
     public static MerchantAggregate create(AuthenticatedUser callingUser, CreateMerchantCommand command, JpaMerchantsRepository repository) {
         // command processing logic
+        var newGeneratedSecret = UUID.randomUUID().toString();
         var newMerchant = new MerchantAggregate(
                 UserId.Companion.random(),
                 callingUser.getUserId(),
+                newGeneratedSecret,
                 command.getCompanyName(),
                 command.getEmailAddress(),
                 command.getPhoneNumber(),
@@ -177,6 +190,7 @@ class MerchantAggregate extends UserEntity {
                         .id(newMerchantId)
                         .updatedBy(UserId.Companion.random())
                         .clientSecret("test-secret")
+                        .companyName("Test Company Name")
                         .emailAddress(EmailAddress.Companion.testRandom())
                         .phoneNumber(PhoneNumber.Companion.testRandom())
                         .merchantPayeeDetails(new MerchantPayeeDetailsEntity(
@@ -190,59 +204,24 @@ class MerchantAggregate extends UserEntity {
                         );
     }
 
-    public static MerchantAggregateBuilder builder() {
-        return new MerchantAggregateBuilder();
+    public static CustomMerchantAggregateBuilder builder() {
+        return new CustomMerchantAggregateBuilder();
     }
 
-    public static class MerchantAggregateBuilder {
-        private UserId userId;
-        private UserId updatedBy;
-        private String clientSecret;
-        private EmailAddress emailAddress;
-        private PhoneNumber phoneNumber;
+    public static class CustomMerchantAggregateBuilder extends MerchantAggregateBuilder {
+
         private MerchantPayeeDetailsEntity merchantPayeeDetails;
 
-        MerchantAggregateBuilder id(UserId id) {
-            this.userId = id;
-            return this;
-        }
-
-        MerchantAggregateBuilder updatedBy(UserId updatedBy) {
-            this.updatedBy = updatedBy;
-            return this;
-        }
-
-        MerchantAggregateBuilder clientSecret(String value) {
-            this.clientSecret = value;
-            return this;
-        }
-
-        MerchantAggregateBuilder emailAddress(EmailAddress value) {
-            this.emailAddress = value;
-            return this;
-        }
-
-        MerchantAggregateBuilder phoneNumber(PhoneNumber value) {
-            this.phoneNumber = value;
-            return this;
-        }
-
-        MerchantAggregateBuilder merchantPayeeDetails(MerchantPayeeDetailsEntity value) {
+        public CustomMerchantAggregateBuilder merchantPayeeDetails(MerchantPayeeDetailsEntity value) {
             this.merchantPayeeDetails = value;
             return this;
         }
 
-        MerchantAggregate build() {
-            var aggregate = new MerchantAggregate(
-                    this.userId,
-                    this.updatedBy,
-                    this.clientSecret,
-                    this.emailAddress,
-                    this.phoneNumber,
-                    this.merchantPayeeDetails
-            );
-            aggregate.setMerchantPayeeDetails(merchantPayeeDetails);
-            return aggregate;
+        @Override
+        public MerchantAggregate build() {
+            MerchantAggregate preBuiltAggregate = super.build();
+            preBuiltAggregate.setMerchantPayeeDetails(merchantPayeeDetails);
+            return preBuiltAggregate;
         }
     }
 

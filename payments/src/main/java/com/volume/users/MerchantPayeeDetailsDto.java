@@ -1,8 +1,13 @@
 package com.volume.users;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
 @Value
+@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 public class MerchantPayeeDetailsDto {
     private final String accountHolderName;
     private final PostalAddressDto postalAddress;

@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hibernate.testing.transaction.TransactionUtil.doInJPA;
 
 @Entity
@@ -69,6 +70,16 @@ class BaseKeyedVersionedEntityTest {
         // assert
         assertThat(loadedInstance).isPresent();
         assertThat(loadedInstance.get()).isEqualTo(newInstance);
+    }
+
+    @Test
+    void whenPrimaryKeyIsNullValidExceptionIsThrown() {
+        assertThatThrownBy(() -> {
+            var newInstance = new SimpleKeyedVersionedEntity(null, "Arek", 45);
+        })
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("Primary key of an entity of type com.volume.shared.infrastructure.persistence.SimpleKeyedVersionedEntity cannot be null");
+
     }
 }
 

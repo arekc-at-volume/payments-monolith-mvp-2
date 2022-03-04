@@ -1,6 +1,8 @@
 package com.volume.shared.infrastructure.persistence;
 
 import lombok.*;
+import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.*;
@@ -151,6 +153,7 @@ public class BaseKeyedVersionedEntityEqualityTests {
         assertThat(instance.equals(new String("terefere"))).isFalse();
     }
 
+    @Disabled("After adding null check precondition that situation is not possible. I leave this test for clarity")
     @Test
     void comparingWithLeftHavingNullIdReturnsFalse() {
         var instance1 = new SimpleEntityToCompareEquality(null, "arek");
@@ -158,6 +161,7 @@ public class BaseKeyedVersionedEntityEqualityTests {
         assertThat(instance1.equals(instance2)).isFalse();
     }
 
+    @Disabled("After adding null check precondition that situation is not possible. I leave this test for clarity")
     @Test
     void comparingWhenBothHaveNullIdReturnsFalse() {
         var instance1 = new SimpleEntityToCompareEquality(null, "arek");
@@ -165,6 +169,7 @@ public class BaseKeyedVersionedEntityEqualityTests {
         assertThat(instance1.equals(instance2)).isFalse();
     }
 
+    @Disabled("After adding null check precondition that situation is not possible. I leave this test for clarity")
     @Test
     void comparingWhenRightHasNullIdReturnsFalse() {
         var instance1 = new SimpleEntityToCompareEquality(UUID.randomUUID(), "arek");
