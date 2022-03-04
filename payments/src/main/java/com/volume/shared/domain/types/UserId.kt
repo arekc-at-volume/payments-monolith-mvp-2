@@ -13,6 +13,13 @@ data class UserId(val value: UUID) : ValueObject, Serializable {
         fun random(): UserId {
             return UserId(UUID.randomUUID())
         }
+        fun fromString(value: String) : UserId {
+            return UserId(UUID.fromString(value));
+        }
+    }
+
+    override fun asString(): String {
+        return this.value.toString()
     }
 }
 
@@ -32,6 +39,10 @@ data class PhoneNumber(val value: String) : ValueObject, Serializable {
             return PhoneNumber(value);
         }
     }
+
+    override fun asString(): String {
+        return this.value.toString()
+    }
 }
 
 data class EmailAddress(val value: String) : ValueObject, Serializable {
@@ -48,5 +59,9 @@ data class EmailAddress(val value: String) : ValueObject, Serializable {
         fun fromString(value: String): EmailAddress {
             return EmailAddress(value)
         }
+    }
+
+    override fun asString(): String {
+        return this.value.toString();
     }
 }

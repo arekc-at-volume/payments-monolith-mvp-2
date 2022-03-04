@@ -1,6 +1,5 @@
 package com.volume.users;
 
-import com.volume.shared.domain.types.UserId;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -10,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManagerFactory;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hibernate.testing.transaction.TransactionUtil.doInJPA;
@@ -31,7 +29,6 @@ class JpaMerchantRepositoryTest {
     void saveNewInstance() {
         // arrange
         var newInstance = MerchantAggregate.randomForTest().build();
-
         // act
         merchantRepository.save(newInstance);
 
@@ -98,6 +95,8 @@ class JpaMerchantRepositoryTest {
         assertThat(loadedInstanceAfterUpdate).isPresent();
         assertThat(loadedInstanceAfterUpdate.get().getClientSecret()).isEqualTo("new-secret");
         assertThat(loadedInstanceAfterUpdate.get().getVersion()).isEqualTo(1L);
+        assertThat(loadedInstanceAfterUpdate.get().getEmailAddress()).isEqualTo(newInstance.getEmailAddress());
+        assertThat(loadedInstanceAfterUpdate.get().getPhoneNumber()).isEqualTo(newInstance.getPhoneNumber());
     }
 
 }
