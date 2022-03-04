@@ -1,4 +1,4 @@
-package com.volume.users.rest.dtos;
+package com.volume.users.rest.dto;
 
 import com.volume.users.AddressType;
 import com.volume.users.PostalAddressVO;

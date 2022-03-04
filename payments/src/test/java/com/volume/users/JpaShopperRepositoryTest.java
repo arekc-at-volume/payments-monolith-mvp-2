@@ -32,7 +32,7 @@ class JpaShopperRepositoryTest {
     @Test
     void saveNewInstance() {
         // arrange
-        var newInstance = new ShopperAggregate(new UserId(UUID.randomUUID()), new UserId(UUID.randomUUID()));
+        var newInstance = ShopperAggregate.forTest();
 
         // act
         shoppersRepository.save(newInstance);
@@ -44,13 +44,15 @@ class JpaShopperRepositoryTest {
             assertThat(loadedInstance).isNotNull();
             assertThat(loadedInstance).isEqualTo(newInstance);
             assertThat(loadedInstance.getVersion()).isEqualTo(0L);
+            assertThat(loadedInstance.getMerchantAppRegistrations()).isNotEmpty();
+            assertThat(loadedInstance.getMerchantAppRegistrations().stream().toList().get(0)).isEqualTo(newInstance.getMerchantAppRegistrations().stream().toList().get(0));
         });
     }
 
     @Test
     void shopperAggregateCanBeLoadedViaShopperRepository() {
         // arrange
-        var newInstance = new ShopperAggregate(new UserId(UUID.randomUUID()), new UserId(UUID.randomUUID()));
+        var newInstance = ShopperAggregate.forTest();
         doInJPA(() -> emf, em -> {
             em.persist(newInstance);
         });
@@ -64,7 +66,7 @@ class JpaShopperRepositoryTest {
     @Test
     void shopperAggregateCanBeLoadedViaUsersRepository() {
         // arrange
-        var newInstance = new ShopperAggregate(new UserId(UUID.randomUUID()), new UserId(UUID.randomUUID()));
+        var newInstance = ShopperAggregate.forTest();
         doInJPA(() -> emf, em -> {
             em.persist(newInstance);
         });

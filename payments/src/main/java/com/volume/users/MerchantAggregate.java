@@ -7,8 +7,8 @@ import com.volume.shared.domain.types.EmailAddress;
 import com.volume.shared.domain.types.PhoneNumber;
 import com.volume.shared.domain.types.UserId;
 import com.volume.users.persistence.JpaMerchantsRepository;
-import com.volume.users.rest.dtos.MerchantDto;
-import com.volume.users.rest.dtos.MerchantPayeeDetailsDto;
+import com.volume.users.rest.dto.MerchantDto;
+import com.volume.users.rest.dto.MerchantPayeeDetailsDto;
 import lombok.*;
 
 import javax.persistence.*;

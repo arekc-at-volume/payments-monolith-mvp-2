@@ -1,12 +1,13 @@
-package com.volume.users;
+package com.volume.users.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.volume.shared.domain.types.EmailAddress;
 import com.volume.shared.domain.types.PhoneNumber;
 import com.volume.shared.domain.types.UserId;
 import com.volume.shared.infrastructure.rest.RestErrorResponse;
-import com.volume.users.rest.dtos.CreateMerchantRequestDto;
-import com.volume.users.rest.dtos.MerchantDto;
+import com.volume.users.MerchantAggregate;
+import com.volume.users.rest.dto.CreateMerchantRequestDto;
+import com.volume.users.rest.dto.MerchantDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

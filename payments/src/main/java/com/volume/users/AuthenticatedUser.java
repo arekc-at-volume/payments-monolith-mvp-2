@@ -16,4 +16,5 @@ public class AuthenticatedUser {
     public static AuthenticatedUser admin() {
         return ADMIN;
     }
+    public static AuthenticatedUser merchant() { return MERCHANT; }
 }

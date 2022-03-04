@@ -1,4 +1,4 @@
-package com.volume.users.rest.dtos;
+package com.volume.users.rest.dto;
 
 import com.volume.shared.domain.messages.CreateMerchantCommand;
 import com.volume.shared.domain.types.EmailAddress;
