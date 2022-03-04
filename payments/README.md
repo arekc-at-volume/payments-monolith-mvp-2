@@ -44,4 +44,8 @@ This includes:
 - some good handlers for DomainExceptions
 - some good handlers for external call errors
 
+## Absolutely, definitely add Value Types on DTO level
+
+Maybe this will work ? https://www.baeldung.com/spring-boot-jsoncomponent
+
 

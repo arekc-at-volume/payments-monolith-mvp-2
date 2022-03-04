@@ -9,3 +9,4 @@ class MerchantNotFoundException : DomainException {
     constructor(merchantId: UserId) : super("Merchant with id=${merchantId.value.toString()} does not exist");
     constructor(merchantId: UserId, throwable: Throwable) : super("Merchant with id=${merchantId.value.toString()} does not exist", throwable);
 }
+
