@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter // TODO: how can we not expose these getters? How can we assert in tests and map between layers without it?
 @Inheritance(strategy = InheritanceType.JOINED)
+public
 class UserEntity extends BaseKeyedVersionedAggregateRoot<UserId> {
     private LocalDateTime createAt;
     private LocalDateTime updatedAt;

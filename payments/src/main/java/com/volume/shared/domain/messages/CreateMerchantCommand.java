@@ -2,7 +2,7 @@ package com.volume.shared.domain.messages;
 
 import com.volume.shared.domain.types.EmailAddress;
 import com.volume.shared.domain.types.PhoneNumber;
-import com.volume.users.MerchantPayeeDetailsDto;
+import com.volume.users.rest.dtos.MerchantPayeeDetailsDto;
 import lombok.Value;
 
 import java.io.Serializable;

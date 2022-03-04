@@ -1,4 +1,4 @@
-package com.volume.users;
+package com.volume.users.rest.dtos;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

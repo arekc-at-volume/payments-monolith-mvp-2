@@ -5,6 +5,8 @@ import com.volume.shared.domain.types.EmailAddress;
 import com.volume.shared.domain.types.PhoneNumber;
 import com.volume.shared.domain.types.UserId;
 import com.volume.shared.infrastructure.rest.RestErrorResponse;
+import com.volume.users.rest.dtos.CreateMerchantRequestDto;
+import com.volume.users.rest.dtos.MerchantDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,12 +18,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
-import java.util.List;
-
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hibernate.testing.transaction.TransactionUtil.doInJPA;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

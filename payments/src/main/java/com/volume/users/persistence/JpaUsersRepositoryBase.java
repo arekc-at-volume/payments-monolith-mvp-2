@@ -1,4 +1,4 @@
-package com.volume.users;
+package com.volume.users.persistence;
 
 import com.volume.shared.domain.types.UserId;
 import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedAggregateRepository;
@@ -6,5 +6,5 @@ import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedAggregateR
 import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
-interface JpaUsersRepositoryBase<Aggregate extends BaseKeyedVersionedAggregateRoot<UserId>> extends BaseKeyedVersionedAggregateRepository<Aggregate, UserId> {
+public interface JpaUsersRepositoryBase<Aggregate extends BaseKeyedVersionedAggregateRoot<UserId>> extends BaseKeyedVersionedAggregateRepository<Aggregate, UserId> {
 }

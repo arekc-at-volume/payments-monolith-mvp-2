@@ -1,6 +1,8 @@
 package com.volume.users;
 
 import com.volume.shared.domain.types.UserId;
+import com.volume.users.persistence.JpaShoppersRepository;
+import com.volume.users.persistence.JpaUsersRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

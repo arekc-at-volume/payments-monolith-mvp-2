@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 
 @Entity
 @Getter
+public
 class ShopperAggregate extends UserEntity {
     protected ShopperAggregate() {
         super();
