@@ -33,4 +33,19 @@ class PostalAddressVO implements ValueObject {
     public String asString() {
         return this.toString();
     }
+
+    public static PostalAddressVO testDomesticPaymentUKPayeeAddress() {
+        return new PostalAddressVO(
+                null,
+                AddressType.POSTAL, // TODO: no idea if that is correct
+                null,
+                "United Kingdom",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
 }

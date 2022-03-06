@@ -25,4 +25,12 @@ class AccountIdentificationVO implements ValueObject {
     public String asString() {
         return this.toString();
     }
+
+    public static AccountIdentificationVO testAccountNumber() {
+        return new AccountIdentificationVO(AccountIdentificationType.ACCOUNT_NUMBER, "12345678");
+    }
+
+    public static AccountIdentificationVO testSortCode() {
+        return new AccountIdentificationVO(AccountIdentificationType.SORT_CODE, "123456");
+    }
 }

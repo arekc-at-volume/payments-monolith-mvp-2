@@ -76,7 +76,7 @@ class YapilyTestInstitutionsForAuthorizationFlowType {
 class YapilyClientImplTest {
 
     val client = YapilyClientImpl()
-    val INSTITUTION = InstitutionId("modelo-sandbox")
+    val INSTITUTION = YapilyInstitutionId("modelo-sandbox")
     lateinit var existingClient: ApplicationUser
 
     @BeforeAll

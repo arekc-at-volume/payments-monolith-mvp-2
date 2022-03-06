@@ -3,7 +3,6 @@ package com.volume.yapily
 import yapily.ApiException
 import yapily.sdk.*
 import java.math.BigDecimal
-import java.util.*
 import java.util.function.Consumer
 
 /**
@@ -59,7 +58,7 @@ interface YapilyClient {
      */
     fun generateAuthorizationUrl(
         userApplicationId: YapilyApplicationUserId,
-        institutionId: InstitutionId,
+        institutionId: YapilyInstitutionId,
         paymentRequest: PaymentRequest,
         callback: String = DEFAULT_CALLBACK
     ): PaymentAuthorisationRequestResponse

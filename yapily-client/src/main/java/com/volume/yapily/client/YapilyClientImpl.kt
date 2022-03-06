@@ -63,7 +63,7 @@ class YapilyClientImpl : YapilyClient {
 
     override fun generateAuthorizationUrl(
         userApplicationId: YapilyApplicationUserId,
-        institutionId: InstitutionId,
+        institutionId: YapilyInstitutionId,
         paymentRequest: PaymentRequest,
         callback: String
     ): PaymentAuthorisationRequestResponse {

@@ -3,8 +3,21 @@ package com.volume.shared.domain.types
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import com.volume.shared.infrastructure.persistence.ValueObject
+import com.volume.yapily.YapilyInstitutionId
 import java.io.Serializable
 import java.util.*
+
+data class InstitutionId(private val value: String) : ValueObject, Serializable {
+
+    companion object {
+        @JsonCreator
+        fun fromString(value: String): InstitutionId = InstitutionId(value)
+        fun fromYapilyInstitution(value: YapilyInstitutionId): InstitutionId = InstitutionId(value.value)
+    }
+
+    override fun asString(): String = value
+
+}
 
 data class UserId(private val value: UUID) : ValueObject, Serializable {
     init {
@@ -53,3 +66,13 @@ data class DeviceId(val value: UUID) : ValueObject, Serializable {
 
 }
 
+data class TransferIdempotencyId(private val value: String) : ValueObject, Serializable {
+    companion object {
+        fun random(): TransferIdempotencyId = TransferIdempotencyId(UUID.randomUUID().toString().replace("-", ""))
+
+        @JsonCreator
+        fun fromString(value: String): TransferIdempotencyId = TransferIdempotencyId(value)
+    }
+
+    override fun asString(): String = value;
+}

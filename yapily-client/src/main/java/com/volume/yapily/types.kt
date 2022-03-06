@@ -8,15 +8,15 @@ interface YapilyAccountIdentification {
     fun toDbString(): String
 }
 
-data class InstitutionId(val value: String) {
+data class YapilyInstitutionId(val value: String) {
     init {
         // validate here
     }
 
     companion object {
         val MODELO_SANDBOX = "modelo-sandbox"
-        fun modeloSandbox() : InstitutionId {
-            return InstitutionId(MODELO_SANDBOX)
+        fun modeloSandbox() : YapilyInstitutionId {
+            return YapilyInstitutionId(MODELO_SANDBOX)
         }
     }
 }
