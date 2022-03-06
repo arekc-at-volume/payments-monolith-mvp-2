@@ -48,4 +48,6 @@ This includes:
 
 Maybe this will work ? https://www.baeldung.com/spring-boot-jsoncomponent
 
+## Add discovery whether given institution supports refund payments and add support for it
+
 

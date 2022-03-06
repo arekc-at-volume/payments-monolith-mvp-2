@@ -13,7 +13,7 @@ import java.util.List;
 public class MerchantPayeeDetailsDto {
     private final String accountHolderName;
     private final PostalAddressDto postalAddress;
-    private final List<AccountIdentificationDto> accountIdentificationDto;
+    private final List<AccountIdentificationDto> accountIdentification;
 
     public static MerchantPayeeDetailsDto forTest() {
         return new MerchantPayeeDetailsDto(

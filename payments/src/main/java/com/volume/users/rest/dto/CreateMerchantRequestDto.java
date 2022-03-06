@@ -16,14 +16,14 @@ import java.util.Random;
 public class CreateMerchantRequestDto {
     private final String companyName;
     private final EmailAddress email;
-    private final PhoneNumber phoneNumber;
+    private final PhoneNumber phone;
     private final MerchantPayeeDetailsDto merchantPayeeDetails;
 
     public CreateMerchantCommand toCommand() {
         return new CreateMerchantCommand(
                 this.companyName,
                 this.email,
-                this.phoneNumber,
+                this.phone,
                 this.merchantPayeeDetails
         );
     }

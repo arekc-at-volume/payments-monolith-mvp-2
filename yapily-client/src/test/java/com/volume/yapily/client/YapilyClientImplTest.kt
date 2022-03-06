@@ -126,6 +126,7 @@ class YapilyClientImplTest {
             YapilyApplicationUserId(existingClient.applicationUserId),
             INSTITUTION,
             paymentRequest,
+            true,
             "https://localhost:8080/api/callback/"
         )
 

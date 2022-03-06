@@ -60,8 +60,11 @@ interface YapilyClient {
         userApplicationId: YapilyApplicationUserId,
         institutionId: YapilyInstitutionId,
         paymentRequest: PaymentRequest,
+        oneTimeToken: Boolean,
         callback: String = DEFAULT_CALLBACK
     ): PaymentAuthorisationRequestResponse
+
+    fun exchangeOneTimeToken(oneTimeToken: String): Consent
 
     /**
      * Once user authorized CREATE_DOMESTIC_SINGLE_PAYMENT we can create the payment.
@@ -91,7 +94,8 @@ interface YapilyClient {
         paymentIdempotencyId: YapilyPaymentIdempotencyId,
         // translates to paymentRequest.reference (I think it is a payment description)
         paymentDescription: String,
-        payeeAccountIdentifications: List<YapilyAccountIdentification>
+        payeeAccountIdentifications: List<YapilyAccountIdentification>,
+        readRefundAccount: Boolean = false
     ): PaymentRequest
 }
 

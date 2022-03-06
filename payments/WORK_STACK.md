@@ -1,4 +1,7 @@
-# no add TransferController with create and generateAuthorizationUrl for now
+# robiłem TransferController::handleCallback (parked)
+-> ale nie ma handlera w aggregacie
+# TransferAggregate::handle(callback) 
+
      
 
 

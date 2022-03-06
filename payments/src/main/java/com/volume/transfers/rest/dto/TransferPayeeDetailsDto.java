@@ -33,7 +33,7 @@ public class TransferPayeeDetailsDto {
         return new TransferPayeeDetailsDto(
                 merchantPayeeDetails.getAccountHolderName(),
                 merchantPayeeDetails.getPostalAddress(),
-                merchantPayeeDetails.getAccountIdentificationDto()
+                merchantPayeeDetails.getAccountIdentification()
         );
     }
 }

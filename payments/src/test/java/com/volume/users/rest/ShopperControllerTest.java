@@ -6,6 +6,8 @@ import com.volume.shared.domain.types.UserId;
 import com.volume.users.MerchantOnDeviceRegistrationEntity;
 import com.volume.users.ShopperAggregate;
 import com.volume.users.persistence.JpaShoppersRepository;
+import com.volume.users.rest.dto.CreateShopperRequestDto;
+import com.volume.users.rest.dto.CreateShopperResponseDto;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

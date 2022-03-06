@@ -76,8 +76,8 @@ class MerchantAggregate extends UserEntity {
                 newMerchant,
                 command.getMerchantPayeeDetailsDto().getAccountHolderName(),
                 command.getMerchantPayeeDetailsDto().getPostalAddress().toDomain(),
-                command.getMerchantPayeeDetailsDto().getAccountIdentificationDto().get(0).toDomain(),
-                command.getMerchantPayeeDetailsDto().getAccountIdentificationDto().get(1).toDomain()
+                command.getMerchantPayeeDetailsDto().getAccountIdentification().get(0).toDomain(),
+                command.getMerchantPayeeDetailsDto().getAccountIdentification().get(1).toDomain()
         );
         newMerchant.setMerchantPayeeDetails(merchantPayeeDetails);
 
@@ -111,8 +111,8 @@ class MerchantAggregate extends UserEntity {
                                         null, // TODO: for this is just a hack. Fix it.
                                         merchantPayeeDetailsDto.getAccountHolderName(),
                                         merchantPayeeDetailsDto.getPostalAddress().toDomain(),
-                                        merchantPayeeDetailsDto.getAccountIdentificationDto().get(0).toDomain(),
-                                        merchantPayeeDetailsDto.getAccountIdentificationDto().get(1).toDomain()
+                                        merchantPayeeDetailsDto.getAccountIdentification().get(0).toDomain(),
+                                        merchantPayeeDetailsDto.getAccountIdentification().get(1).toDomain()
                                 )
                         );
     }

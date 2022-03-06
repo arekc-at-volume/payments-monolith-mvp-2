@@ -10,6 +10,7 @@ import static java.lang.String.format;
 
 @Value
 public class CreateMerchantResponseDto {
+    // TODO: Add all created merchant's details here
     private String merchantId;
 
     public static CreateMerchantResponseDto fromAggregate(MerchantAggregate aggregate) {

@@ -5,11 +5,13 @@ import com.volume.shared.domain.messages.*;
 import com.volume.shared.domain.types.*;
 import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedAggregateRoot;
 import com.volume.transfers.persistence.JpaTransferAggregateRepository;
+import com.volume.transfers.rest.dto.TransferDto;
 import com.volume.yapily.YapilyApplicationUserId;
 import com.volume.yapily.YapilyClient;
 import com.volume.yapily.YapilyInstitutionId;
 import com.volume.yapily.YapilyUserId;
 import lombok.*;
+import yapily.sdk.Consent;
 import yapily.sdk.PaymentAuthorisationRequestResponse;
 import yapily.sdk.PaymentRequest;
 
@@ -45,6 +47,8 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
     // consent details:
     private LocalDateTime consentRequestedAt;
     private InstitutionConsentId institutionConsentId;
+    @Column(length = 2000) // TODO : validate what really should be the length of consentToken
+    private String consentToken;
 
     // other
     private LocalDateTime createdAt;
@@ -115,7 +119,7 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
         newTransfer.registerEvent(
                 new TransferCreatedEvent(
                         newTransfer.getId(),
-                        newTransfer.getMerchantId(),
+                        newTransfer.getShopperId(),
                         newTransfer.getMerchantId(),
                         newTransfer.getAmount(),
                         newTransfer.getCurrency(),
@@ -134,7 +138,7 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
         return newTransfer;
     }
 
-    public TransferAggregate handle(GeneratePaymentAuthorizationUrlCommand command, JpaTransferAggregateRepository repository, YapilyClient yapilyClient) {
+    public TransferAggregate handle(GeneratePaymentAuthorizationUrlCommand command, YapilyClient yapilyClient) {
 
         PaymentRequest paymentRequest = yapilyClient.createPaymentRequest(
                 this.amount,
@@ -142,7 +146,8 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
                 this.payee.getAccountHolderName(),
                 this.idempotencyId.toYapily(),
                 this.description,
-                List.of(this.payee.getAccountIdentification1().toYapily(), this.payee.getAccountIdentification2().toYapily())
+                List.of(this.payee.getAccountIdentification1().toYapily(), this.payee.getAccountIdentification2().toYapily()),
+                false // TODO: add discovery of refund feature in a particular institution
         );
 
         var consentRequestedAt = LocalDateTime.now();
@@ -150,8 +155,11 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
                 this.yapilyApplicationUserId,
                 this.institutionId.toYapily(),
                 paymentRequest,
-                "https://localhost:8080/api/callback/"
+                true,
+                "http://localhost:8080/api/callback/?transferId=" + command.getTransferId().asString()
         );
+
+        // TODO: add error handling
 
         // update aggregate stat
         this.consentRequestedAt = consentRequestedAt;
@@ -163,6 +171,22 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
                         this.getId(),
                         paymentAuthorisationRequestResponse.getAuthorisationUrl(),
                         paymentAuthorisationRequestResponse.getQrCodeUrl()
+                )
+        );
+
+        return this;
+    }
+
+    public TransferAggregate handle(HandleAuthorizationCallbackCommand command, YapilyClient yapilyClient) {
+        Consent consent = yapilyClient.exchangeOneTimeToken(command.getOneTimeToken());
+
+        // TODO: add error handling
+        // TODO: here is way more to do. I haven't fully analyzed response from yapily.
+        this.consentToken = consent.getConsentToken();
+
+        this.registerEvent(
+                new AuthorizationCallbackHandledEvent(
+                        this.getId()
                 )
         );
 
@@ -197,5 +221,38 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
     void fixAmountPrecision() {
         // TODO: research topic from business and technical side
         this.amount.setScale(2);
+    }
+
+//    // external references
+//    private UserId shopperId;
+//    private UserId merchantId;
+//    private YapilyApplicationUserId yapilyApplicationUserId;
+//    private YapilyUserId yapilyUserId;
+//
+//    // transfer details
+//    private BigDecimal amount;
+//    private String currency;
+//    private String description;
+//    private String reference;
+//    private TransferIdempotencyId idempotencyId;
+//
+//    // transfer details : payer
+//    private InstitutionId institutionId;
+
+    public TransferDto toDto() {
+        return new TransferDto(
+                this.getId(),
+                this.getShopperId(),
+                this.getMerchantId(),
+                this.getYapilyApplicationUserId(),
+                this.getYapilyUserId(),
+                this.getAmount(),
+                this.getCurrency(),
+                this.getDescription(),
+                this.getReference(),
+                this.getIdempotencyId(),
+                this.getInstitutionId(),
+                this.getPayee().toDto()
+        );
     }
 }

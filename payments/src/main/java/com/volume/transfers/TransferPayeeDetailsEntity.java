@@ -2,11 +2,15 @@ package com.volume.transfers;
 
 import com.volume.shared.domain.types.TransferId;
 import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedEntity;
+import com.volume.transfers.rest.dto.TransferPayeeDetailsDto;
 import com.volume.users.AccountIdentificationVO;
 import com.volume.users.PostalAddressVO;
+import com.volume.users.rest.dto.AccountIdentificationDto;
+import com.volume.users.rest.dto.PostalAddressDto;
 import lombok.Getter;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -53,5 +57,16 @@ class TransferPayeeDetailsEntity extends BaseKeyedVersionedEntity<TransferId> {
 
     public void setTransfer(TransferAggregate transferAggregate) {
         this.transfer = transferAggregate;
+    }
+
+    public TransferPayeeDetailsDto toDto() {
+        return new TransferPayeeDetailsDto(
+                this.accountHolderName,
+                PostalAddressDto.fromDomain(this.postalAddress),
+                List.of(
+                        AccountIdentificationDto.fromDomain(this.accountIdentification1),
+                        AccountIdentificationDto.fromDomain(this.accountIdentification2)
+                )
+        );
     }
 }

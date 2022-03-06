@@ -2,6 +2,7 @@ package com.volume.transfers;
 
 import com.volume.shared.domain.messages.GeneratePaymentAuthorizationUrlCommand;
 import com.volume.transfers.persistence.JpaTransferAggregateRepository;
+import com.volume.transfers.rest.dto.TransferDto;
 import com.volume.transfers.rest.dto.*;
 import com.volume.shared.domain.AuthenticatedUser;
 import com.volume.users.MerchantAggregate;
@@ -13,7 +14,11 @@ import com.volume.users.persistence.JpaMerchantsRepository;
 import com.volume.users.persistence.JpaShoppersRepository;
 import com.volume.yapily.YapilyClient;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -66,10 +71,38 @@ public class TransferAggregateService {
 
         GeneratePaymentAuthorizationUrlCommand generatePaymentAuthorizationUrlCommand = requestDto.toCommand();
         TransferAggregate transferAggregateAfter =
-                transferAggregateBefore.handle(generatePaymentAuthorizationUrlCommand, transferRepository, yapilyClient);
+                transferAggregateBefore.runOnAggregate(
+                        generatePaymentAuthorizationUrlCommand,
+                        transferAggregateBefore::handle,
+                        transferRepository, yapilyClient
+                );
 
         return GeneratePaymentAuthorizationUrlResponseDto.fromAggregate(transferAggregateAfter);
     }
 
+    public HandleAuthorizationCallbackResponseDto handleAuthorizationCallback(AuthenticatedUser callingUser, HandleAuthorizationCallbackRequestDto requestDto) {
+        // constraint 1: transfer must exist and be in status = TODO
+        TransferAggregate transferAggregateBefore = transferRepository.findById(requestDto.getTransferId())
+                .orElseThrow(() -> new TransferNotFoundException(requestDto.getTransferId()));
+        // TODO: validate transfer status
 
+        var command = requestDto.toCommand();
+        var transferAggregateAfter = transferAggregateBefore.runOnAggregate(
+                command,
+                transferAggregateBefore::handle,
+                transferRepository, yapilyClient
+        );
+
+        return HandleAuthorizationCallbackResponseDto.fromAggregate(transferAggregateAfter);
+    }
+
+
+    public List<TransferDto> getAllTransfers() {
+        return
+                transferRepository.findAll()
+                        .stream()
+                        .map(TransferAggregate::toDto)
+                        .collect(Collectors.toList());
+    }
 }
+

@@ -1,6 +1,7 @@
 package com.volume.yapily
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
 import yapily.sdk.AccountIdentification
 import java.util.*
 
@@ -52,6 +53,9 @@ data class YapilyUserId(val value: UUID) : java.io.Serializable {
         @JsonCreator
         fun fromString(value: String): YapilyUserId = YapilyUserId(UUID.fromString(value))
     }
+
+    @JsonValue
+    fun asString(): String = value.toString()
 }
 
 /**
@@ -72,6 +76,9 @@ data class YapilyApplicationUserId(val value: String) : java.io.Serializable {
             return YapilyApplicationUserId(UUID.randomUUID().toString().replace("-", ""))
         }
     }
+
+    @JsonValue
+    fun asString(): String = value
 }
 
 data class YapilyReferenceUserId(val value: UUID) : java.io.Serializable {
@@ -85,6 +92,9 @@ data class YapilyReferenceUserId(val value: UUID) : java.io.Serializable {
         @JsonCreator
         fun fromString(value: String): YapilyReferenceUserId = YapilyReferenceUserId(UUID.fromString(value))
     }
+
+    @JsonValue
+    fun asString(): String = value.toString()
 }
 
 /**

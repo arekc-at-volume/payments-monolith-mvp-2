@@ -1,8 +1,6 @@
 package com.volume.users.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.volume.shared.domain.types.EmailAddress;
-import com.volume.shared.domain.types.PhoneNumber;
 import com.volume.shared.domain.types.UserId;
 import com.volume.shared.infrastructure.rest.RestErrorResponse;
 import com.volume.users.MerchantAggregate;
@@ -57,7 +55,7 @@ class MerchantsControllerTest {
             assertThat(merchant.getUpdatedAt()).isNotNull();
             assertThat(merchant.getUpdateBy()).isNotNull();
             assertThat(merchant.getCompanyName()).isEqualTo(request.getCompanyName());
-            assertThat(merchant.getPhoneNumber()).isEqualTo(request.getPhoneNumber());
+            assertThat(merchant.getPhoneNumber()).isEqualTo(request.getPhone());
             assertThat(merchant.getEmailAddress()).isEqualTo(request.getEmail());
         });
     }

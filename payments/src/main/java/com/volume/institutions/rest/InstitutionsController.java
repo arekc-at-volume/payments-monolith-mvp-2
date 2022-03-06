@@ -12,6 +12,8 @@ import yapily.sdk.Media;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static yapily.sdk.Institution.FeaturesEnum.*;
+
 @Value
 class InstitutionCountryDto {
     private final String displayName;
@@ -57,9 +59,14 @@ class InstitutionDto {
     }
 
     private static boolean isInterestingFeature(Institution.FeaturesEnum feature) {
-        return feature == Institution.FeaturesEnum.INITIATE_DOMESTIC_SINGLE_PAYMENT
-                || feature == Institution.FeaturesEnum.CREATE_DOMESTIC_SINGLE_PAYMENT
-                || feature.toString().toLowerCase().contains("vrp");
+        return
+                List.of(
+                        INITIATE_DOMESTIC_SINGLE_PAYMENT,
+                        CREATE_DOMESTIC_SINGLE_PAYMENT,
+                        READ_DOMESTIC_SINGLE_REFUND,
+                        INITIATE_DOMESTIC_VARIABLE_RECURRING_PAYMENT,
+                        CREATE_DOMESTIC_VARIABLE_RECURRING_PAYMENT
+                ).contains(feature);
     }
 }
 

@@ -9,8 +9,8 @@ import java.util.function.Consumer
 
 @Service
 class YapilyClientImpl : YapilyClient {
-    private val APPLICATION_ID: String = "5304fabb-8d11-43bc-8198-bcc97cbd226f";
-    private val APPLICATION_SECRET: String = "3603af71-22e9-48b5-afcc-691d80958d2c";
+    private val APPLICATION_ID: String = "fac901bb-72cb-484a-bdf8-fdb083961edc";
+    private val APPLICATION_SECRET: String = "a0052cd6-0249-4763-9621-b6cf041612e4";
     private val API_VERSION = "1.0"
 
 
@@ -18,6 +18,7 @@ class YapilyClientImpl : YapilyClient {
     val institutionsApi: InstitutionsApi
     val applicationUserApi: ApplicationUsersApi
     val paymentsApi: PaymentsApi
+    val consentApi: ConsentsApi
 
     init {
         var auth = apiClient.getAuthentication("basicAuth") as HttpBasicAuth
@@ -27,6 +28,7 @@ class YapilyClientImpl : YapilyClient {
         institutionsApi = InstitutionsApi(apiClient)
         applicationUserApi = ApplicationUsersApi(apiClient)
         paymentsApi = PaymentsApi(apiClient)
+        consentApi = ConsentsApi(apiClient)
     }
 
     override fun getInstitutions(): List<Institution> {
@@ -65,6 +67,7 @@ class YapilyClientImpl : YapilyClient {
         userApplicationId: YapilyApplicationUserId,
         institutionId: YapilyInstitutionId,
         paymentRequest: PaymentRequest,
+        oneTimeToken: Boolean,
         callback: String
     ): PaymentAuthorisationRequestResponse {
         var authorizationRequest = PaymentAuthorisationRequest()
@@ -72,10 +75,17 @@ class YapilyClientImpl : YapilyClient {
         authorizationRequest.applicationUserId = userApplicationId.value
         authorizationRequest.callback = callback
         authorizationRequest.paymentRequest = paymentRequest
+        authorizationRequest.oneTimeToken = oneTimeToken
 
         return paymentsApi.createPaymentAuthorisationUsingPOST(
             authorizationRequest, API_VERSION, null, null, null
         ).data
+    }
+
+    override fun exchangeOneTimeToken(oneTimeToken: String): Consent {
+        var request = OneTimeTokenRequest()
+        request.oneTimeToken = oneTimeToken;
+        return consentApi.getConsentBySingleAccessConsentUsingPOST(request, API_VERSION)
     }
 
     override fun makePayment(consentToken: String, paymentRequest: PaymentRequest): ApiResponseOfPaymentResponse {
@@ -88,7 +98,8 @@ class YapilyClientImpl : YapilyClient {
         payeeName: String,
         paymentIdempotencyId: YapilyPaymentIdempotencyId,
         paymentDescription: String,
-        payeeAccountIdentifications: List<YapilyAccountIdentification>
+        payeeAccountIdentifications: List<YapilyAccountIdentification>,
+        readRefundAccount: Boolean
     ): PaymentRequest {
 
         var amount = Amount()
@@ -106,6 +117,7 @@ class YapilyClientImpl : YapilyClient {
         paymentRequest.type = PaymentRequest.TypeEnum.DOMESTIC_PAYMENT
         paymentRequest.reference = paymentDescription
         paymentRequest.amount = amount
+        paymentRequest.readRefundAccount = readRefundAccount
 
         return paymentRequest
     }

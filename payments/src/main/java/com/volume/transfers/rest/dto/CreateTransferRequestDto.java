@@ -6,11 +6,16 @@ import com.volume.shared.domain.types.UserId;
 import com.volume.yapily.YapilyApplicationUserId;
 import com.volume.yapily.YapilyInstitutionId;
 import com.volume.yapily.YapilyUserId;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
 import java.math.BigDecimal;
 
 @Value
+@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 public class CreateTransferRequestDto {
     // external references
     private final UserId shopperId;
