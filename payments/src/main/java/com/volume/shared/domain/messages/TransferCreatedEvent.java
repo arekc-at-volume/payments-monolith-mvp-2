@@ -4,6 +4,7 @@ import com.volume.shared.domain.types.InstitutionId;
 import com.volume.shared.domain.types.TransferId;
 import com.volume.shared.domain.types.TransferIdempotencyId;
 import com.volume.shared.domain.types.UserId;
+import com.volume.transfers.TransferStatus;
 import lombok.Value;
 
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Value
 public class TransferCreatedEvent {
     private TransferId transferId;
+    private TransferStatus transferStatus;
 
     // external references
     private UserId shopperId;

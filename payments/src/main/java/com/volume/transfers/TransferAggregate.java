@@ -11,6 +11,9 @@ import com.volume.yapily.YapilyClient;
 import com.volume.yapily.YapilyInstitutionId;
 import com.volume.yapily.YapilyUserId;
 import lombok.*;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import yapily.sdk.Consent;
 import yapily.sdk.PaymentAuthorisationRequestResponse;
 import yapily.sdk.PaymentRequest;
@@ -20,10 +23,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 @Entity
 @Getter
 public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferId> {
+    private TransferStatus transferStatus;
+
     // external references
     private UserId shopperId;
     private UserId merchantId;
@@ -69,6 +73,7 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
             UserId createdBy
     ) {
         super(id);
+        this.transferStatus = TransferStatus.CREATED;
         this.shopperId = shopperId;
         this.merchantId = merchantId;
         this.yapilyApplicationUserId = yapilyApplicationUserId;
@@ -119,6 +124,7 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
         newTransfer.registerEvent(
                 new TransferCreatedEvent(
                         newTransfer.getId(),
+                        newTransfer.getTransferStatus(),
                         newTransfer.getShopperId(),
                         newTransfer.getMerchantId(),
                         newTransfer.getAmount(),
@@ -138,32 +144,33 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
         return newTransfer;
     }
 
-    public TransferAggregate handle(GeneratePaymentAuthorizationUrlCommand command, YapilyClient yapilyClient) {
+    static class TransactionStatusUpdater {
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        protected void updateTransferStatus(TransferAggregate aggregate, TransferStatus status) {
+            aggregate.transferStatus = status;
+        }
+    }
 
-        PaymentRequest paymentRequest = yapilyClient.createPaymentRequest(
-                this.amount,
-                this.currency,
-                this.payee.getAccountHolderName(),
-                this.idempotencyId.toYapily(),
-                this.description,
-                List.of(this.payee.getAccountIdentification1().toYapily(), this.payee.getAccountIdentification2().toYapily()),
-                false // TODO: add discovery of refund feature in a particular institution
-        );
+    public TransferAggregate handle(GeneratePaymentAuthorizationUrlCommand command, YapilyClient yapilyClient) {
+        // update status
+        var statusUpdater = new TransactionStatusUpdater();
+        statusUpdater.updateTransferStatus(this, TransferStatus.REQUESTING_AUTHORIZATION_URL);
 
         var consentRequestedAt = LocalDateTime.now();
-        PaymentAuthorisationRequestResponse paymentAuthorisationRequestResponse = yapilyClient.generateAuthorizationUrl(
-                this.yapilyApplicationUserId,
-                this.institutionId.toYapily(),
-                paymentRequest,
-                true,
-                "http://localhost:8080/api/callback/?transferId=" + command.getTransferId().asString()
-        );
-
-        // TODO: add error handling
+        PaymentAuthorisationRequestResponse paymentAuthorisationRequestResponse = null;
+        try {
+            paymentAuthorisationRequestResponse = requestAuthorizationUrl(command, yapilyClient);
+        } catch (Exception exception) {
+            // TODO: go through this really carefully. Right now its not enough
+            statusUpdater.updateTransferStatus(this, TransferStatus.AUTHORIZATION_URL_REQUEST_FAILED);
+        }
 
         // update aggregate stat
         this.consentRequestedAt = consentRequestedAt;
         this.institutionConsentId = new InstitutionConsentId(paymentAuthorisationRequestResponse.getInstitutionConsentId());
+
+        // after everything is done, let's update status again
+        statusUpdater.updateTransferStatus(this, TransferStatus.AUTHORIZATION_URL_REQUEST_SUCCEEDED);
 
         // generate events
         this.registerEvent(
@@ -177,9 +184,33 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
         return this;
     }
 
-    public TransferAggregate handle(HandleAuthorizationCallbackCommand command, YapilyClient yapilyClient) {
-        Consent consent = yapilyClient.exchangeOneTimeToken(command.getOneTimeToken());
+    @NotNull
+    private PaymentAuthorisationRequestResponse requestAuthorizationUrl(GeneratePaymentAuthorizationUrlCommand command, YapilyClient yapilyClient) {
+        PaymentRequest paymentRequest = yapilyClient.createPaymentRequest(
+                this.amount,
+                this.currency,
+                this.payee.getAccountHolderName(),
+                this.idempotencyId.toYapily(),
+                this.description,
+                List.of(this.payee.getAccountIdentification1().toYapily(), this.payee.getAccountIdentification2().toYapily()),
+                false // TODO: add discovery of refund feature in a particular institution
+        );
+        PaymentAuthorisationRequestResponse paymentAuthorisationRequestResponse = yapilyClient.generateAuthorizationUrl(
+                this.yapilyApplicationUserId,
+                this.institutionId.toYapily(),
+                paymentRequest,
+                true,
+                "http://localhost:8080/api/callback/?transferId=" + command.getTransferId().asString()
+        );
+        return paymentAuthorisationRequestResponse;
+    }
 
+    public TransferAggregate handle(HandleAuthorizationCallbackCommand command, YapilyClient yapilyClient) {
+        var statusUpdater = new TransactionStatusUpdater();
+        // TODO: improve this simplified status handling. Error is not handled here
+        statusUpdater.updateTransferStatus(this, TransferStatus.AUTHORIZATION_SUCCEEDED);
+
+        Consent consent = yapilyClient.exchangeOneTimeToken(command.getOneTimeToken());
         // TODO: add error handling
         // TODO: here is way more to do. I haven't fully analyzed response from yapily.
         this.consentToken = consent.getConsentToken();
@@ -223,25 +254,10 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
         this.amount.setScale(2);
     }
 
-//    // external references
-//    private UserId shopperId;
-//    private UserId merchantId;
-//    private YapilyApplicationUserId yapilyApplicationUserId;
-//    private YapilyUserId yapilyUserId;
-//
-//    // transfer details
-//    private BigDecimal amount;
-//    private String currency;
-//    private String description;
-//    private String reference;
-//    private TransferIdempotencyId idempotencyId;
-//
-//    // transfer details : payer
-//    private InstitutionId institutionId;
-
     public TransferDto toDto() {
         return new TransferDto(
                 this.getId(),
+                this.getTransferStatus(),
                 this.getShopperId(),
                 this.getMerchantId(),
                 this.getYapilyApplicationUserId(),
@@ -252,7 +268,9 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
                 this.getReference(),
                 this.getIdempotencyId(),
                 this.getInstitutionId(),
-                this.getPayee().toDto()
+                this.getPayee().toDto(),
+                this.getConsentRequestedAt(),
+                this.getConsentToken()
         );
     }
 }

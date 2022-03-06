@@ -47,6 +47,7 @@ class TransferAggregateTest {
         doInJPA(() -> emf, em -> {
             TransferAggregate transferAggregate = em.find(TransferAggregate.class, newTransfer.getTransferId());
             assertThat(transferAggregate).isNotNull();
+            assertThat(transferAggregate.getTransferStatus()).isEqualTo(TransferStatus.CREATED);
             assertThat(transferAggregate.getShopperId()).isEqualTo(newTransfer.getShopperId());
             assertThat(transferAggregate.getMerchantId()).isEqualTo(newTransfer.getMerchantId());
             assertThat(transferAggregate.getPayee()).isNotNull();
