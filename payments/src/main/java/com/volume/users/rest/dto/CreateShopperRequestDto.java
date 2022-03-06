@@ -12,13 +12,10 @@ import lombok.Value;
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class CreateShopperRequestDto {
-    private final String deviceId;
-    private final String merchantId;
+    private final DeviceId deviceId;
+    private final UserId merchantId;
 
     public CreateShopperCommand toCommand() {
-        return new CreateShopperCommand(
-                DeviceId.Companion.fromString(deviceId),
-                UserId.Companion.fromString(merchantId)
-        );
+        return new CreateShopperCommand(deviceId, merchantId);
     }
 }

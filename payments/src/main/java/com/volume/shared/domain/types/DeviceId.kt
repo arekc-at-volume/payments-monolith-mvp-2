@@ -1,5 +1,6 @@
 package com.volume.shared.domain.types
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.volume.shared.infrastructure.persistence.ValueObject
 import java.io.Serializable
 import java.util.*
@@ -7,7 +8,7 @@ import java.util.*
 /**
  * Temporary DeviceId. In the future it will become more complex entity.
  */
-data class DeviceId(val value: UUID) : ValueObject, Serializable {
+data class DeviceId(private val value: UUID) : ValueObject, Serializable {
 
     init {
         // TODO: Add validation
@@ -21,6 +22,7 @@ data class DeviceId(val value: UUID) : ValueObject, Serializable {
         fun random() : DeviceId {
             return DeviceId(UUID.randomUUID())
         }
+        @JsonCreator
         fun fromString(value: String) : DeviceId {
             return DeviceId(UUID.fromString(value))
         }

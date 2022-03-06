@@ -45,11 +45,22 @@ public class TransfersController {
     @GetMapping("/api/callback/")
     ResponseEntity callback(@RequestParam("one-time-token") String oneTimeTokenString, @RequestParam("transferId") String transferIdString) {
         var transferId = TransferId.Companion.fromString(transferIdString);
-        HandleAuthorizationCallbackResponseDto handleAuthorizationCallbackResponseDto = transferAggregateService.handleAuthorizationCallback(
-                AuthenticatedUser.merchant(),
-                new HandleAuthorizationCallbackRequestDto(transferId, oneTimeTokenString));
 
-        return ResponseEntity.ok().body(handleAuthorizationCallbackResponseDto);
+        var handleCallbackAndMakePayment = true;
+
+        Object responseDto = null;
+
+        if (handleCallbackAndMakePayment) {
+            responseDto = transferAggregateService.handleAuthorizationCallbackAndMakePayment(
+                    AuthenticatedUser.merchant(),
+                    new HandleAuthorizationCallbackRequestDto(transferId, oneTimeTokenString));
+        } else {
+            responseDto = transferAggregateService.handleAuthorizationCallback(
+                    AuthenticatedUser.merchant(),
+                    new HandleAuthorizationCallbackRequestDto(transferId, oneTimeTokenString));
+        }
+
+        return ResponseEntity.ok().body(responseDto);
     }
 
     @PostMapping("/api/transfers/{transferId}/make-payment")
@@ -62,7 +73,7 @@ public class TransfersController {
         return ResponseEntity.ok().body(makePaymentResponseDto);
     }
 
-    @PostMapping("/api/transfers/start-entire-flow")
+    @PostMapping("/api/transfers/start-transfer-flow")
     ResponseEntity<RunPaymentFlowResponseDto> runPaymentFlow(@RequestBody RunPaymentFlowRequestDto requestDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)

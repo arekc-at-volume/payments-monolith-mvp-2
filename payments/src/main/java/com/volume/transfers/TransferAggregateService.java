@@ -1,17 +1,21 @@
 package com.volume.transfers;
 
 import com.volume.shared.domain.AuthenticatedUser;
+import com.volume.shared.domain.messages.CreateShopperCommand;
 import com.volume.shared.domain.messages.GeneratePaymentAuthorizationUrlCommand;
 import com.volume.shared.domain.messages.PaymentMadeEvent;
 import com.volume.transfers.persistence.JpaTransferAggregateRepository;
 import com.volume.transfers.rest.dto.*;
 import com.volume.users.MerchantAggregate;
 import com.volume.users.ShopperAggregate;
+import com.volume.users.ShopperApplicationService;
 import com.volume.users.exceptions.MerchantNotFoundException;
 import com.volume.users.exceptions.ShopperNotFoundException;
 import com.volume.users.exceptions.TransferNotFoundException;
 import com.volume.users.persistence.JpaMerchantsRepository;
 import com.volume.users.persistence.JpaShoppersRepository;
+import com.volume.users.rest.dto.CreateShopperRequestDto;
+import com.volume.users.rest.dto.CreateShopperResponseDto;
 import com.volume.yapily.YapilyClient;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class TransferAggregateService {
 
+    private final ShopperApplicationService shopperService;
     private final JpaTransferAggregateRepository transferRepository;
     private final JpaShoppersRepository shopperRepository;
     private final JpaMerchantsRepository merchantRepository;
@@ -95,6 +100,11 @@ public class TransferAggregateService {
         return HandleAuthorizationCallbackResponseDto.fromAggregate(transferAggregateAfter);
     }
 
+    public MakePaymentResponseDto handleAuthorizationCallbackAndMakePayment(AuthenticatedUser callingUser, HandleAuthorizationCallbackRequestDto requestDto) {
+        var handleAuthorizationCallbackResponseDto = handleAuthorizationCallback(callingUser, requestDto);
+        var makePaymentRequestDto = new MakePaymentRequestDto(requestDto.getTransferId());
+        return this.makePayment(callingUser, makePaymentRequestDto);
+    }
 
     public List<TransferDto> getAllTransfers() {
         return
@@ -120,7 +130,28 @@ public class TransferAggregateService {
     }
 
     public RunPaymentFlowResponseDto runPaymentFlow(AuthenticatedUser callingUser, RunPaymentFlowRequestDto requestDto) {
-        throw new UnsupportedOperationException("TODO");
+        var createShopperCommand = new CreateShopperCommand(requestDto.getDeviceId(), requestDto.getMerchantId());
+        var createShopperRequestDto = new CreateShopperRequestDto(requestDto.getDeviceId(), requestDto.getMerchantId());
+        var createShopperResponseDto = shopperService.createShopper(createShopperRequestDto);
+        var createTransferRequestDto = new CreateTransferRequestDto(
+                createShopperResponseDto.getShopperId(),
+                requestDto.getMerchantId(),
+                requestDto.getAmount(),
+                requestDto.getCurrency(),
+                requestDto.getDescription(),
+                requestDto.getReference(),
+                requestDto.getInstitutionId()
+        );
+        var createTransferResponseDto = createNewTransfer(callingUser, createTransferRequestDto);
+        var generatePaymentAuthorizationUrlRequestDto =
+                new GeneratePaymentAuthorizationUrlRequestDto(createTransferResponseDto.getTransferId());
+        var generatePaymentAuthorizationUrlResponseDto =
+                generateAuthorizationUrl(callingUser, generatePaymentAuthorizationUrlRequestDto);
+        return new RunPaymentFlowResponseDto(
+                generatePaymentAuthorizationUrlResponseDto.getTransferId(),
+                generatePaymentAuthorizationUrlResponseDto.getAuthorizationUrl(),
+                generatePaymentAuthorizationUrlResponseDto.getQrCodeUrl()
+        );
     }
 }
 

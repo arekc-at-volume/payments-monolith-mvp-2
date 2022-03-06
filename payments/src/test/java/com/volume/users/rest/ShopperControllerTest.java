@@ -50,8 +50,8 @@ class ShopperControllerTest {
 
         // act
         var requestDto = new CreateShopperRequestDto(
-                newInstanceRegistration.getDeviceId().asString(),
-                newInstanceRegistration.getMerchantId().asString()
+                newInstanceRegistration.getDeviceId(),
+                newInstanceRegistration.getMerchantId()
         );
         String responseString = mvc.perform(
                         post("/api/shoppers")
@@ -66,9 +66,9 @@ class ShopperControllerTest {
         CreateShopperResponseDto responseDto = mapper.readValue(responseString, CreateShopperResponseDto.class);
 
         assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getShopperId()).isNotBlank();
-        assertThat(responseDto.getDeviceId()).isEqualTo(newInstanceRegistration.getDeviceId().asString());
-        assertThat(responseDto.getMerchantId()).isEqualTo(newInstanceRegistration.getMerchantId().asString());
+        assertThat(responseDto.getShopperId()).isNotNull();
+        assertThat(responseDto.getDeviceId()).isEqualTo(newInstanceRegistration.getDeviceId());
+        assertThat(responseDto.getMerchantId()).isEqualTo(newInstanceRegistration.getMerchantId());
     }
 
     @Disabled("This test will become relevant when we decide that we bind shopperId to ONLY deviceId and not to deviceId AND merchantId. For the latter is implemented")
@@ -84,8 +84,8 @@ class ShopperControllerTest {
         // act : simulate shopper making call from the same device but new app/merchant
         var differentMerchantId = UserId.Companion.random();
         var requestDto = new CreateShopperRequestDto(
-                newInstanceRegistration.getDeviceId().asString(),
-                differentMerchantId.asString()
+                newInstanceRegistration.getDeviceId(),
+                differentMerchantId
         );
         String responseString = mvc.perform(
                         post("/api/shoppers")
@@ -100,7 +100,7 @@ class ShopperControllerTest {
         CreateShopperResponseDto responseDto = mapper.readValue(responseString, CreateShopperResponseDto.class);
 
         assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getShopperId()).isNotBlank();
+        assertThat(responseDto.getShopperId()).isNotNull();
         assertThat(responseDto.getDeviceId()).isEqualTo(newInstanceRegistration.getDeviceId().asString());
         assertThat(responseDto.getMerchantId()).isEqualTo(differentMerchantId.asString());
 
@@ -120,7 +120,7 @@ class ShopperControllerTest {
         var merchantId = UserId.Companion.random();
 
         // act
-        var requestDto = new CreateShopperRequestDto(deviceId.asString(), merchantId.asString());
+        var requestDto = new CreateShopperRequestDto(deviceId, merchantId);
         String responseString = mvc.perform(
                         post("/api/shoppers")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -134,9 +134,9 @@ class ShopperControllerTest {
         CreateShopperResponseDto responseDto = mapper.readValue(responseString, CreateShopperResponseDto.class);
 
         assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getShopperId()).isNotBlank();
-        assertThat(responseDto.getDeviceId()).isEqualTo(deviceId.asString());
-        assertThat(responseDto.getMerchantId()).isEqualTo(merchantId.asString());
+        assertThat(responseDto.getShopperId()).isNotNull();
+        assertThat(responseDto.getDeviceId()).isEqualTo(deviceId);
+        assertThat(responseDto.getMerchantId()).isEqualTo(merchantId);
     }
 
     @Test
@@ -166,8 +166,8 @@ class ShopperControllerTest {
         assertThat(responseDto.getUpdatedBy()).isNotNull();
         assertThat(responseDto.getVersion()).isEqualTo(0);
         assertThat(responseDto.getMerchantRegistrations().size()).isEqualTo(1);
-        assertThat(responseDto.getMerchantRegistrations().get(0).getMerchantId()).isEqualTo(newInstanceRegistration.getMerchantId().asString());
-        assertThat(responseDto.getMerchantRegistrations().get(0).getDeviceId()).isEqualTo(newInstanceRegistration.getDeviceId().asString());
+        assertThat(responseDto.getMerchantRegistrations().get(0).getMerchantId()).isEqualTo(newInstanceRegistration.getMerchantId());
+        assertThat(responseDto.getMerchantRegistrations().get(0).getDeviceId()).isEqualTo(newInstanceRegistration.getDeviceId());
         assertThat(responseDto.getMerchantRegistrations().get(0).getVersion()).isEqualTo(0);
     }
 

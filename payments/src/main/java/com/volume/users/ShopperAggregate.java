@@ -3,19 +3,32 @@ package com.volume.users;
 import com.volume.shared.domain.AuthenticatedUser;
 import com.volume.shared.domain.messages.CreateShopperCommand;
 import com.volume.shared.domain.messages.ShopperCreatedEvent;
+import com.volume.shared.domain.types.DeviceId;
 import com.volume.shared.domain.types.UserId;
+import com.volume.shared.infrastructure.rest.RestErrorResponse;
+import com.volume.users.exceptions.ShopperNotFoundException;
+import com.volume.users.persistence.JpaMerchantOnDeviceRegistrationRepository;
 import com.volume.users.persistence.JpaShoppersRepository;
 import com.volume.users.rest.MerchantOnDeviceRegistrationDto;
 import com.volume.users.rest.ShopperDto;
+import com.volume.users.rest.dto.CreateShopperRequestDto;
+import com.volume.users.rest.dto.CreateShopperResponseDto;
 import com.volume.yapily.YapilyApplicationUserId;
 import com.volume.yapily.YapilyClient;
 import com.volume.yapily.YapilyReferenceUserId;
 import com.volume.yapily.YapilyUserId;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.cloud.sleuth.Tracer;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import yapily.sdk.ApplicationUser;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -105,16 +118,16 @@ public class ShopperAggregate extends UserEntity {
 
     public ShopperDto toDto() {
         return new ShopperDto(
-            this.getId().asString(),
-            this.getCreateAt(),
-            this.getUpdatedAt(),
-            this.getUpdateBy().asString(),
-            this.merchantAppRegistrations.stream().map(registrationEntity -> new MerchantOnDeviceRegistrationDto(
-                    registrationEntity.getDeviceId().asString(),
-                    registrationEntity.getMerchantId().asString(),
-                    registrationEntity.getVersion()
-            )).collect(Collectors.toList()),
-            this.getVersion()
+                this.getId().asString(),
+                this.getCreateAt(),
+                this.getUpdatedAt(),
+                this.getUpdateBy().asString(),
+                this.merchantAppRegistrations.stream().map(registrationEntity -> new MerchantOnDeviceRegistrationDto(
+                        registrationEntity.getDeviceId(),
+                        registrationEntity.getMerchantId(),
+                        registrationEntity.getVersion()
+                )).collect(Collectors.toList()),
+                this.getVersion()
         );
     }
 }

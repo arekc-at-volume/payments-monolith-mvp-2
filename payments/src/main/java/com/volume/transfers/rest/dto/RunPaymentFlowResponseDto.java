@@ -11,4 +11,6 @@ import lombok.Value;
 @AllArgsConstructor
 public class RunPaymentFlowResponseDto {
     private final TransferId transferId;
+    private final String authorizationUrl;
+    private final String qrCodeUrl;
 }
