@@ -16,7 +16,7 @@ public class CreateMerchantResponseDto {
         return DtoUtilities.createResultFromEvent(
                 aggregate,
                 MerchantCreatedEvent.class,
-                event -> new CreateMerchantResponseDto(event.getMerchantId().getValue().toString())
+                event -> new CreateMerchantResponseDto(event.getMerchantId().asString())
         );
     }
 

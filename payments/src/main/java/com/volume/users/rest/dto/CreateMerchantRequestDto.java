@@ -15,15 +15,15 @@ import java.util.Random;
 @AllArgsConstructor
 public class CreateMerchantRequestDto {
     private final String companyName;
-    private final String email;
-    private final String phoneNumber;
+    private final EmailAddress email;
+    private final PhoneNumber phoneNumber;
     private final MerchantPayeeDetailsDto merchantPayeeDetails;
 
     public CreateMerchantCommand toCommand() {
         return new CreateMerchantCommand(
                 this.companyName,
-                EmailAddress.fromString(email),
-                PhoneNumber.fromString(phoneNumber),
+                this.email,
+                this.phoneNumber,
                 this.merchantPayeeDetails
         );
     }
@@ -31,8 +31,8 @@ public class CreateMerchantRequestDto {
     public static CreateMerchantRequestDto forTest() {
         return new CreateMerchantRequestDto(
                 "company ABC" + new Random().nextInt(),
-                EmailAddress.fromString("boss@company.com").toString(),
-                PhoneNumber.fromString("123456789").toString(),
+                EmailAddress.fromString("boss@company.com"),
+                PhoneNumber.fromString("123456789"),
                 MerchantPayeeDetailsDto.forTest()
         );
     }

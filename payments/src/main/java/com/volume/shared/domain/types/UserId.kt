@@ -1,10 +1,12 @@
 package com.volume.shared.domain.types
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
 import com.volume.shared.infrastructure.persistence.ValueObject
 import java.io.Serializable
 import java.util.*
 
-data class UserId(val value: UUID) : ValueObject, Serializable {
+data class UserId(private val value: UUID) : ValueObject, Serializable {
     init {
         // validate here
         // TODO: add validator
@@ -15,11 +17,13 @@ data class UserId(val value: UUID) : ValueObject, Serializable {
             return UserId(UUID.randomUUID())
         }
 
+        @JsonCreator
         fun fromString(value: String): UserId {
             return UserId(UUID.fromString(value));
         }
     }
 
+    @JsonValue
     override fun asString(): String {
         return this.value.toString()
     }

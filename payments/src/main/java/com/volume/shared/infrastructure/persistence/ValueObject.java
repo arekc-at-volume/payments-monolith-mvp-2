@@ -1,5 +1,7 @@
 package com.volume.shared.infrastructure.persistence;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public interface ValueObject {
     /**
      * I have a lot of transitions from Domain/Persistence layer to Dto.
@@ -7,5 +9,6 @@ public interface ValueObject {
      * I found it kinda error prone to do that valueObject.getValue().toString()
      * I it seems like valueObject.asString is easier and cleaner. I leave it like this until I find a better solution.
      */
+    @JsonValue
     String asString();
 }

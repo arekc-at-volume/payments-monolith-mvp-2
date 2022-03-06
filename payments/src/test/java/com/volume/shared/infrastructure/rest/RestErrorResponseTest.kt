@@ -1,5 +1,6 @@
 package com.volume.shared.infrastructure.rest
 
+import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
@@ -20,7 +21,7 @@ import org.springframework.http.HttpStatus
  */
 @JsonTest
 //@ExtendWith(SpringExtension::class)
-//@Import(ObjectMapperConfiguration::class)
+//#@Import(ObjectMapperConfiguration::class)
 class RestErrorResponseTest(@Autowired val mapper: ObjectMapper) {
     // This test checks if with additional ObjectMapper configuration for kotlin this type will serialize/deserialize properly
     @Test
@@ -32,3 +33,4 @@ class RestErrorResponseTest(@Autowired val mapper: ObjectMapper) {
         assertThat(deserialized).isEqualTo(instance);
     }
 }
+

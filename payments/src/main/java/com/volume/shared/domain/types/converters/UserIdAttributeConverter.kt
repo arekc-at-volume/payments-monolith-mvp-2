@@ -8,7 +8,7 @@ import javax.persistence.Converter
 @Converter(autoApply = true)
 class UserIdAttributeConverter : AttributeConverter<UserId?, String?> {
     override fun convertToDatabaseColumn(attribute: UserId?): String? {
-        return attribute?.value?.toString()
+        return attribute?.asString()
     }
 
     override fun convertToEntityAttribute(dbData: String?): UserId? {

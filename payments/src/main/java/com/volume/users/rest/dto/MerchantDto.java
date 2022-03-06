@@ -1,5 +1,8 @@
 package com.volume.users.rest.dto;
 
+import com.volume.shared.domain.types.EmailAddress;
+import com.volume.shared.domain.types.PhoneNumber;
+import com.volume.shared.domain.types.UserId;
 import com.volume.users.MerchantAggregate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -12,13 +15,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class MerchantDto {
-    private final String merchantId;
+    private final UserId merchantId;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
-    private final String updatedBy;
+    private final UserId updatedBy;
     private final String companyName;
-    private final String emailAddress;
-    private final String phoneNumber;
+    private final EmailAddress emailAddress;
+    private final PhoneNumber phoneNumber;
 
     public static MerchantDto fromAggregate(MerchantAggregate aggregate) {
         return aggregate.toDto();

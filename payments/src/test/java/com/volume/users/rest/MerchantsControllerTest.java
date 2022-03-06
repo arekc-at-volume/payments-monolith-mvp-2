@@ -34,7 +34,8 @@ class MerchantsControllerTest {
     MockMvc mvc;
     @Autowired
     EntityManagerFactory emf;
-    private ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper mapper;
 
     @Test
     void postMerchant_returns201CreatedWithNewMerchantId() throws Exception {
@@ -56,8 +57,8 @@ class MerchantsControllerTest {
             assertThat(merchant.getUpdatedAt()).isNotNull();
             assertThat(merchant.getUpdateBy()).isNotNull();
             assertThat(merchant.getCompanyName()).isEqualTo(request.getCompanyName());
-            assertThat(merchant.getPhoneNumber()).isEqualTo(PhoneNumber.fromString(request.getPhoneNumber()));
-            assertThat(merchant.getEmailAddress()).isEqualTo(EmailAddress.fromString(request.getEmail()));
+            assertThat(merchant.getPhoneNumber()).isEqualTo(request.getPhoneNumber());
+            assertThat(merchant.getEmailAddress()).isEqualTo(request.getEmail());
         });
     }
 
@@ -70,7 +71,7 @@ class MerchantsControllerTest {
         });
 
         String responseString = mvc.perform(
-                        get("/api/merchants/" + existingMerchant.getId().getValue().toString())
+                        get("/api/merchants/" + existingMerchant.getId().asString())
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())

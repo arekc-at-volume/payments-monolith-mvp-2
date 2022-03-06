@@ -139,13 +139,13 @@ class MerchantAggregate extends UserEntity {
 
     public MerchantDto toDto() {
         return new MerchantDto(
-                this.getId().asString(),
+                this.getId(),
                 null, // TODO: add this field to aggregate
                 null, // TODO: add this field to aggregate
                 null, // TODO: add this field to aggregate
                 null, // TODO: add this field to aggregate
-                this.emailAddress.asString(),
-                this.phoneNumber.asString()
+                this.emailAddress,
+                this.phoneNumber
         );
     }
 
