@@ -15,6 +15,7 @@
 
     <properties>
         <java-faker.version>1.0.2</java-faker.version>
+        <swagger.version>1.6.4</swagger.version>
     </properties>
 
     <dependencies>
@@ -64,6 +65,11 @@
             <groupId>com.volume</groupId>
             <artifactId>yapily-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${swagger.version}</version>
         </dependency>
 
         <!-- testing -->
