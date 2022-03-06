@@ -62,5 +62,11 @@ public class TransfersController {
         return ResponseEntity.ok().body(makePaymentResponseDto);
     }
 
+    @PostMapping("/api/transfers/start-entire-flow")
+    ResponseEntity<RunPaymentFlowResponseDto> runPaymentFlow(@RequestBody RunPaymentFlowRequestDto requestDto) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(transferAggregateService.runPaymentFlow(AuthenticatedUser.merchant(), requestDto));
+    }
 }
 

@@ -104,7 +104,7 @@ public class TransferAggregateService {
                         .collect(Collectors.toList());
     }
 
-    public MakePaymentResponseDto makePayment(AuthenticatedUser merchant, MakePaymentRequestDto requestDto) {
+    public MakePaymentResponseDto makePayment(AuthenticatedUser callingUser, MakePaymentRequestDto requestDto) {
         // constraint 1 : payment exists and is in proper status
         TransferAggregate transferAggregateBefore = transferRepository.findById(requestDto.getTransferId())
                 .orElseThrow(() -> new TransferNotFoundException(requestDto.getTransferId()));
@@ -117,6 +117,10 @@ public class TransferAggregateService {
         );
 
         return PaymentMadeEvent.fromAggregate(transferAggregateAfter);
+    }
+
+    public RunPaymentFlowResponseDto runPaymentFlow(AuthenticatedUser callingUser, RunPaymentFlowRequestDto requestDto) {
+        throw new UnsupportedOperationException("TODO");
     }
 }
 
