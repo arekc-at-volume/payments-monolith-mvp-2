@@ -2,11 +2,15 @@ package com.volume.users;
 
 import com.volume.shared.domain.types.UserId;
 import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedEntity;
+import com.volume.users.rest.dto.AccountIdentificationDto;
+import com.volume.users.rest.dto.MerchantPayeeDetailsDto;
+import com.volume.users.rest.dto.PostalAddressDto;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * TODO: Ultimately I don't think primary key will be UserId. I leave if like that for now.
@@ -14,7 +18,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-class MerchantPayeeDetailsEntity extends BaseKeyedVersionedEntity<UserId> {
+public class MerchantPayeeDetailsEntity extends BaseKeyedVersionedEntity<UserId> {
     @OneToOne
     private MerchantAggregate merchant;
     private String accountHolderName;
@@ -51,5 +55,16 @@ class MerchantPayeeDetailsEntity extends BaseKeyedVersionedEntity<UserId> {
 
     public void setMerchant(MerchantAggregate merchant) {
         this.merchant = merchant;
+    }
+
+    public MerchantPayeeDetailsDto toDto() {
+        return new MerchantPayeeDetailsDto(
+                this.accountHolderName,
+                PostalAddressDto.fromDomain(this.postalAddress),
+                List.of(
+                        AccountIdentificationDto.fromDomain(this.accountIdentification1),
+                        AccountIdentificationDto.fromDomain(this.accountIdentification2)
+                )
+        );
     }
 }

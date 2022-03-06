@@ -5,22 +5,24 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Value;
 
+import java.util.List;
+
 @Value
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class MerchantPayeeDetailsDto {
     private final String accountHolderName;
     private final PostalAddressDto postalAddress;
-    private final AccountIdentificationDto[] accountIdentificationDto;
+    private final List<AccountIdentificationDto> accountIdentificationDto;
 
     public static MerchantPayeeDetailsDto forTest() {
         return new MerchantPayeeDetailsDto(
                 "Big Boss",
                 PostalAddressDto.forTest(),
-                new AccountIdentificationDto[]{
+                List.of(
                         AccountIdentificationDto.testAccountNumber(),
-                        AccountIdentificationDto.testSortCode(),
-                }
+                        AccountIdentificationDto.testSortCode()
+                )
         );
     }
 }

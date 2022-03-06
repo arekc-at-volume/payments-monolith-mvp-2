@@ -4,6 +4,6 @@ import com.volume.shared.domain.types.UserId;
 import lombok.Value;
 
 @Value
-public class MerchantCreatedEvent {
+public class MerchantCreatedEvent implements DomainEvent {
     private final UserId merchantId;
 }

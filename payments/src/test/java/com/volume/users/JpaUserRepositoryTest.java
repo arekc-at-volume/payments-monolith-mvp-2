@@ -28,7 +28,7 @@ class JpaUserRepositoryTest {
 
     @Test
     void usersRepositoryIsAbleToReturnAllUsers() {
-        var shopper = new ShopperAggregate(UserId.Companion.random(), UserId.Companion.random());
+        var shopper = ShopperAggregate.forTest();
         var merchant = MerchantAggregate.randomForTest().build();
         doInJPA(() -> emf, em -> {
             em.persist(shopper);

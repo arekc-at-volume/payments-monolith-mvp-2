@@ -86,8 +86,9 @@ interface YapilyClient {
      */
     fun createPaymentRequest(
         transferredAmount: BigDecimal,
+        transferredCurrency: String,
         payeeName: String,
-        paymentIdempotencyId: PaymentIdempotencyId,
+        paymentIdempotencyId: YapilyPaymentIdempotencyId,
         // translates to paymentRequest.reference (I think it is a payment description)
         paymentDescription: String,
         payeeAccountIdentifications: List<YapilyAccountIdentification>

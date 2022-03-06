@@ -17,6 +17,7 @@ import com.volume.users.persistence.JpaShoppersRepository;
 import com.volume.users.rest.dto.CreateMerchantRequestDto;
 import com.volume.users.rest.dto.CreateMerchantResponseDto;
 import com.volume.users.rest.dto.MerchantDto;
+import com.volume.yapily.YapilyClient;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -26,8 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -111,6 +110,7 @@ class ShopperController {
 
     private final JpaShoppersRepository shoppersRepository;
     private final JpaMerchantOnDeviceRegistrationRepository merchantOnDeviceRegistrationRepository;
+    private final YapilyClient yapilyClient;
     private final Tracer tracer;
 
     @PostMapping(value = "/api/shoppers", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -138,7 +138,7 @@ class ShopperController {
 
         // create shopper
         CreateShopperCommand createShopperCommand = requestDto.toCommand();
-        ShopperAggregate shopperAggregate = ShopperAggregate.create(AuthenticatedUser.merchant(), createShopperCommand, shoppersRepository);
+        ShopperAggregate shopperAggregate = ShopperAggregate.create(AuthenticatedUser.merchant(), createShopperCommand, shoppersRepository, yapilyClient);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

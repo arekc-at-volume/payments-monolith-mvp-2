@@ -109,11 +109,12 @@ class YapilyClientImplTest {
     @Test
     fun generateAuthorizationUrl() {
         val applicationUserId = YapilyApplicationUserId("arek1@test.com")
-        val idempotencyId = PaymentIdempotencyId.random()
+        val idempotencyId = YapilyPaymentIdempotencyId.random()
         val paymentRequest = client.createPaymentRequest(
             BigDecimal.valueOf(10),
+            "GBP",
             "test user",
-            PaymentIdempotencyId.random(),
+            YapilyPaymentIdempotencyId.random(),
             "Test payment",
             listOf(
                 AccountIdentificationFactory.sortCode("700001"),

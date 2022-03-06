@@ -84,15 +84,16 @@ class YapilyClientImpl : YapilyClient {
 
     override fun createPaymentRequest(
         transferredAmount: BigDecimal,
+        transferredCurrency: String,
         payeeName: String,
-        paymentIdempotencyId: PaymentIdempotencyId,
+        paymentIdempotencyId: YapilyPaymentIdempotencyId,
         paymentDescription: String,
         payeeAccountIdentifications: List<YapilyAccountIdentification>
     ): PaymentRequest {
 
         var amount = Amount()
         amount.amount = transferredAmount
-        amount.currency = "GBP"
+        amount.currency = transferredCurrency
 
         var payee = Payee()
         payee.name = payeeName

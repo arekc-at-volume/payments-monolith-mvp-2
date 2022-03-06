@@ -2,15 +2,19 @@ package com.volume.users;
 
 import com.volume.shared.domain.messages.CreateShopperCommand;
 import com.volume.shared.domain.messages.ShopperCreatedEvent;
-import com.volume.shared.domain.types.DeviceId;
 import com.volume.shared.domain.types.UserId;
-import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedEntity;
 import com.volume.users.persistence.JpaShoppersRepository;
 import com.volume.users.rest.MerchantOnDeviceRegistrationDto;
 import com.volume.users.rest.ShopperDto;
+import com.volume.yapily.YapilyApplicationUserId;
+import com.volume.yapily.YapilyClient;
+import com.volume.yapily.YapilyReferenceUserId;
+import com.volume.yapily.YapilyUserId;
 import lombok.Getter;
+import yapily.sdk.ApplicationUser;
 
 import javax.persistence.*;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -19,6 +23,10 @@ import java.util.stream.Collectors;
 @Entity
 @Getter
 public class ShopperAggregate extends UserEntity {
+    private YapilyApplicationUserId yapilyApplicationUserId;
+    private YapilyReferenceUserId yapilyReferenceUserId;
+    private YapilyUserId yapilyUserId;
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "shopper")
     private Set<MerchantOnDeviceRegistrationEntity> merchantAppRegistrations = new HashSet<>();
 
@@ -26,20 +34,34 @@ public class ShopperAggregate extends UserEntity {
         super();
     }
 
-    public ShopperAggregate(UserId id, UserId updateBy) {
+    public ShopperAggregate(UserId id, UserId updateBy, YapilyApplicationUserId yapilyApplicationUserId, YapilyReferenceUserId yapilyReferenceUserId, YapilyUserId yapilyUserId, Set<MerchantOnDeviceRegistrationEntity> merchantAppRegistrations) {
         super(id, updateBy);
+        this.yapilyApplicationUserId = yapilyApplicationUserId;
+        this.yapilyReferenceUserId = yapilyReferenceUserId;
+        this.yapilyUserId = yapilyUserId;
+        this.merchantAppRegistrations = merchantAppRegistrations;
     }
 
     public static ShopperAggregate create(
             AuthenticatedUser callingUser,
             CreateShopperCommand createShopperCommand,
-            JpaShoppersRepository shoppersRepository
+            JpaShoppersRepository shoppersRepository,
+            YapilyClient yapilyClient
     ) {
         // command processing logic
+        var yapilyApplicationId = YapilyApplicationUserId.Companion.random();
+        var yapilyReferenceId = YapilyReferenceUserId.Companion.random();
+        ApplicationUser applicationUser = yapilyClient.createApplicationUser(yapilyApplicationId, yapilyReferenceId);
+
         var newShopper = new ShopperAggregate(
                 UserId.Companion.random(),
-                callingUser.getUserId()
+                callingUser.getUserId(),
+                new YapilyApplicationUserId(applicationUser.getApplicationUserId()),
+                YapilyReferenceUserId.Companion.fromString(applicationUser.getReferenceId()),
+                YapilyUserId.Companion.fromString(applicationUser.getUuid()),
+                new HashSet<>()
         );
+
         var newMerchantOnDeviceRegistration = new MerchantOnDeviceRegistrationEntity(
                 UUID.randomUUID(),
                 createShopperCommand.getDeviceId(),
@@ -69,7 +91,11 @@ public class ShopperAggregate extends UserEntity {
     public static ShopperAggregate forTest() {
         var aggregate = new ShopperAggregate(
                 UserId.Companion.random(),
-                UserId.Companion.random()
+                UserId.Companion.random(),
+                YapilyApplicationUserId.Companion.random(),
+                YapilyReferenceUserId.Companion.random(),
+                YapilyUserId.Companion.random(),
+                new HashSet<>()
         );
 
         var testMerchantAppRegistration = MerchantOnDeviceRegistrationEntity.forTest();

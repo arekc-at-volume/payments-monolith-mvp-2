@@ -1,5 +1,6 @@
 package com.volume.yapily
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import yapily.sdk.AccountIdentification
 import java.util.*
 
@@ -25,14 +26,14 @@ data class YapilyInstitutionId(val value: String) {
 /**
  * TODO: find and describe how it works. This is a very important for us identifier.
  */
-data class PaymentIdempotencyId(val value: String) {
+data class YapilyPaymentIdempotencyId(val value: String) {
     init {
         // validate here
     }
 
     companion object {
-        fun random(): PaymentIdempotencyId {
-            return PaymentIdempotencyId(UUID.randomUUID().toString().replace("-", ""))
+        fun random(): YapilyPaymentIdempotencyId {
+            return YapilyPaymentIdempotencyId(UUID.randomUUID().toString().replace("-", ""))
         }
     }
 }
@@ -48,6 +49,8 @@ data class YapilyUserId(val value: UUID) : java.io.Serializable {
         fun random() : YapilyUserId {
             return YapilyUserId(UUID.randomUUID())
         }
+        @JsonCreator
+        fun fromString(value: String): YapilyUserId = YapilyUserId(UUID.fromString(value))
     }
 }
 
@@ -79,6 +82,8 @@ data class YapilyReferenceUserId(val value: UUID) : java.io.Serializable {
         fun random() : YapilyReferenceUserId {
             return YapilyReferenceUserId(UUID.randomUUID())
         }
+        @JsonCreator
+        fun fromString(value: String): YapilyReferenceUserId = YapilyReferenceUserId(UUID.fromString(value))
     }
 }
 
@@ -92,7 +97,7 @@ data class YapilyInstitutionConsentId(val value: String): java.io.Serializable {
     }
 }
 
-data class AccountIdentificationSortCode(val sortCode: String)
+data class YapilyAccountIdentificationSortCode(val sortCode: String)
     : YapilyAccountIdentification {
     init {
         if (sortCode.length != 6) throw java.lang.IllegalArgumentException("Invalid sort code length ${sortCode.length}. It must be 6")
@@ -104,8 +109,8 @@ data class AccountIdentificationSortCode(val sortCode: String)
     }
 
     companion object {
-        fun forTest() : AccountIdentificationSortCode {
-            return AccountIdentificationSortCode("123456")
+        fun forTest() : YapilyAccountIdentificationSortCode {
+            return YapilyAccountIdentificationSortCode("123456")
         }
     }
 
@@ -120,7 +125,7 @@ data class AccountIdentificationSortCode(val sortCode: String)
         return "${AccountIdentification.TypeEnum.SORT_CODE}:$sortCode"
     }
 }
-data class AccountIdentificationAccountNumber(val accountNumber: String)
+data class YapilyAccountIdentificationAccountNumber(val accountNumber: String)
     : YapilyAccountIdentification {
     init {
         if (accountNumber.length != 8) throw java.lang.IllegalArgumentException("Invalid account number length ${accountNumber.length}. It must be 8")
@@ -132,8 +137,8 @@ data class AccountIdentificationAccountNumber(val accountNumber: String)
     }
 
     companion object {
-        fun forTest() : AccountIdentificationAccountNumber {
-            return AccountIdentificationAccountNumber("12345678");
+        fun forTest() : YapilyAccountIdentificationAccountNumber {
+            return YapilyAccountIdentificationAccountNumber("12345678");
         }
     }
 
@@ -155,11 +160,11 @@ data class AccountIdentificationAccountNumber(val accountNumber: String)
 class AccountIdentificationFactory {
 
     companion object {
-        fun sortCode(value: String) : AccountIdentificationSortCode {
-            return AccountIdentificationSortCode(value)
+        fun sortCode(value: String) : YapilyAccountIdentificationSortCode {
+            return YapilyAccountIdentificationSortCode(value)
         }
-        fun accountNumber(value: String) : AccountIdentificationAccountNumber {
-            return AccountIdentificationAccountNumber(value)
+        fun accountNumber(value: String) : YapilyAccountIdentificationAccountNumber {
+            return YapilyAccountIdentificationAccountNumber(value)
         }
         fun fromDbString(dbString: String) : YapilyAccountIdentification {
             // TODO: handle edge cases. test
@@ -167,8 +172,8 @@ class AccountIdentificationFactory {
             var type = AccountIdentification.TypeEnum.fromValue(split[0])
             var value = split[1]
             return when (type) {
-                AccountIdentification.TypeEnum.SORT_CODE -> AccountIdentificationSortCode(value)
-                AccountIdentification.TypeEnum.ACCOUNT_NUMBER -> AccountIdentificationAccountNumber(value)
+                AccountIdentification.TypeEnum.SORT_CODE -> YapilyAccountIdentificationSortCode(value)
+                AccountIdentification.TypeEnum.ACCOUNT_NUMBER -> YapilyAccountIdentificationAccountNumber(value)
                 else -> throw java.lang.IllegalArgumentException("Unsupported AccountIdentification type ${type}")
             }
         }

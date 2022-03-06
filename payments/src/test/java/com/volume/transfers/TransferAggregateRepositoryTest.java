@@ -42,6 +42,8 @@ class TransferAggregateRepositoryTest {
             assertThat(transferAggregate.getId()).isNotNull();
             assertThat(transferAggregate.getShopperId()).isEqualTo(newInstance.getShopperId());
             assertThat(transferAggregate.getMerchantId()).isEqualTo(newInstance.getMerchantId());
+            assertThat(transferAggregate.getYapilyApplicationUserId()).isEqualTo(newInstance.getYapilyApplicationUserId());
+            assertThat(transferAggregate.getYapilyUserId()).isEqualTo(newInstance.getYapilyUserId());
             assertThat(transferAggregate.getAmount()).isEqualTo(newInstance.getAmount());
             assertThat(transferAggregate.getCurrency()).isEqualTo(newInstance.getCurrency());
             assertThat(transferAggregate.getDescription()).isEqualTo(newInstance.getDescription());

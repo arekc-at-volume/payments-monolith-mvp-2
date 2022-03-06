@@ -45,6 +45,9 @@ class JpaShopperRepositoryTest {
             assertThat(loadedInstance).isEqualTo(newInstance);
             assertThat(loadedInstance.getVersion()).isEqualTo(0L);
             assertThat(loadedInstance.getMerchantAppRegistrations()).isNotEmpty();
+            assertThat(loadedInstance.getYapilyApplicationUserId()).isNotNull();
+            assertThat(loadedInstance.getYapilyReferenceUserId()).isNotNull();
+            assertThat(loadedInstance.getYapilyUserId()).isNotNull();
             assertThat(loadedInstance.getMerchantAppRegistrations().stream().toList().get(0)).isEqualTo(newInstance.getMerchantAppRegistrations().stream().toList().get(0));
         });
     }

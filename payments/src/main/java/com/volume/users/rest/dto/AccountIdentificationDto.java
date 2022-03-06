@@ -25,4 +25,8 @@ public class AccountIdentificationDto {
     public AccountIdentificationVO toDomain() {
         return new AccountIdentificationVO(this.type, this.number);
     }
+
+    public static AccountIdentificationDto fromDomain(AccountIdentificationVO domain) {
+        return new AccountIdentificationDto(domain.getType(), domain.getNumber());
+    }
 }

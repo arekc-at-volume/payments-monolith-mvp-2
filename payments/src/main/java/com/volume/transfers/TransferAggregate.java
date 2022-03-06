@@ -1,22 +1,35 @@
 package com.volume.transfers;
 
-import com.volume.shared.domain.types.InstitutionId;
-import com.volume.shared.domain.types.TransferId;
-import com.volume.shared.domain.types.TransferIdempotencyId;
-import com.volume.shared.domain.types.UserId;
+import com.volume.shared.domain.messages.DomainEvent;
+import com.volume.shared.domain.messages.MerchantCreatedEvent;
+import com.volume.shared.domain.types.*;
 import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedAggregateRepository;
 import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedAggregateRoot;
 import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedEntity;
-import com.volume.users.AccountIdentificationVO;
-import com.volume.users.AuthenticatedUser;
-import com.volume.users.PostalAddressVO;
+import com.volume.shared.infrastructure.rest.dto.DtoUtilities;
+import com.volume.users.*;
+import com.volume.users.exceptions.MerchantNotFoundException;
+import com.volume.users.exceptions.ShopperNotFoundException;
+import com.volume.users.exceptions.TransferNotFoundException;
+import com.volume.users.persistence.JpaMerchantsRepository;
+import com.volume.users.persistence.JpaShoppersRepository;
+import com.volume.users.rest.dto.AccountIdentificationDto;
+import com.volume.users.rest.dto.CreateMerchantResponseDto;
+import com.volume.users.rest.dto.MerchantPayeeDetailsDto;
+import com.volume.users.rest.dto.PostalAddressDto;
+import com.volume.yapily.YapilyApplicationUserId;
+import com.volume.yapily.YapilyClient;
 import com.volume.yapily.YapilyInstitutionId;
-import lombok.Getter;
-import lombok.Value;
+import com.volume.yapily.YapilyUserId;
+import lombok.*;
+import org.springframework.stereotype.Service;
+import yapily.sdk.PaymentAuthorisationRequestResponse;
+import yapily.sdk.PaymentRequest;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 enum TransferType {
     DOMESTIC_PAYMENT,
@@ -27,21 +40,53 @@ interface JpaTransferAggregateRepository extends BaseKeyedVersionedAggregateRepo
 }
 
 @Value
+@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
+@AllArgsConstructor
+class TransferPayeeDetailsDto {
+    private final String accountHolderName;
+    private final PostalAddressDto postalAddress;
+    private final List<AccountIdentificationDto> accountIdentificationDto;
+
+    public static TransferPayeeDetailsDto forTest() {
+        return new TransferPayeeDetailsDto(
+                "some merchant",
+                PostalAddressDto.forTest(),
+                List.of(
+                        AccountIdentificationDto.testAccountNumber(),
+                        AccountIdentificationDto.testSortCode()
+                )
+        );
+    }
+
+    public static TransferPayeeDetailsDto from(MerchantPayeeDetailsDto merchantPayeeDetails) {
+        return new TransferPayeeDetailsDto(
+                merchantPayeeDetails.getAccountHolderName(),
+                merchantPayeeDetails.getPostalAddress(),
+                merchantPayeeDetails.getAccountIdentificationDto()
+        );
+    }
+}
+
+
+@Value
 class CreateTransferCommand {
     // external references
-    private UserId shopperId;
-    private UserId merchantId;
+    private final UserId shopperId;
+    private final UserId merchantId;
+    private final YapilyApplicationUserId yapilyApplicationUserId;
+    private final YapilyUserId yapilyUserId;
 
     // transfer details
-    private BigDecimal amount;
-    private String currency;
-    private String description;
-    private String reference;
+    private final BigDecimal amount;
+    private final String currency;
+    private final String description;
+    private final String reference;
 
     // transfer details : payer
-    private InstitutionId institutionId;
+    private final InstitutionId institutionId;
 
     // transfer details : payee
+    private final TransferPayeeDetailsDto transferPayeeDetails;
 }
 
 @Value
@@ -118,12 +163,197 @@ class TransferPayeeDetailsEntity extends BaseKeyedVersionedEntity<TransferId> {
     }
 }
 
+@Value
+class GeneratePaymentAuthorizationUrlCommand {
+    private final TransferId transferId;
+}
+
+@Value
+class PaymentAuthorizationUrlCreatedEvent implements DomainEvent {
+    private final TransferId transferId;
+    private final String authorizationUrl;
+    private final String qrCodeUrl;
+}
+
+@Value
+class CreateTransferRequestDto {
+    // external references
+    private final UserId shopperId;
+    private final UserId merchantId;
+
+    // transfer details
+    private final BigDecimal amount;
+    private final String currency;
+    private final String description;
+    private final String reference;
+
+    // transfer details : payer
+    private final InstitutionId institutionId;
+
+    public static CreateTransferRequestDto forTest(UserId existingShopper, UserId existingMerchant) {
+        return new CreateTransferRequestDto(
+                existingShopper,
+                existingMerchant,
+                BigDecimal.valueOf(10.00),
+                "GBP",
+                "test transfer description",
+                "test transfer reference",
+                InstitutionId.Companion.fromYapilyInstitution(YapilyInstitutionId.Companion.modeloSandbox())
+        );
+    }
+
+    // transfer details : payee
+
+    public CreateTransferCommand toCommand(
+            YapilyApplicationUserId yapilyApplicationUserId,
+            YapilyUserId yapilyUserId,
+            TransferPayeeDetailsDto transferPayeeDetailsDto
+    ) {
+        return new CreateTransferCommand(
+                this.shopperId,
+                this.merchantId,
+                yapilyApplicationUserId,
+                yapilyUserId,
+                this.amount,
+                this.currency,
+                this.description,
+                this.reference,
+                this.institutionId,
+                transferPayeeDetailsDto
+        );
+    }
+}
+
+@Value
+class CreateTransferResponseDto {
+    private final TransferId transferId;
+
+    // external references
+    private final UserId shopperId;
+    private final UserId merchantId;
+
+    // transfer details
+    private final BigDecimal amount;
+    private final String currency;
+    private final String description;
+    private final String reference;
+
+    // transfer details : payer
+    private final InstitutionId institutionId;
+
+    // transfer details : payee
+
+
+    public static CreateTransferResponseDto fromAggregate(TransferAggregate aggregate) {
+        var event = DtoUtilities.getEvent(aggregate, TransferCreatedEvent.class);
+        return new CreateTransferResponseDto(
+                event.getTransferId(),
+                event.getShopperId(),
+                event.getMerchantId(),
+                event.getAmount(),
+                event.getCurrency(),
+                event.getDescription(),
+                event.getReference(),
+                event.getInstitutionId()
+        );
+    }
+
+}
+
+@Service
+@AllArgsConstructor
+class TransferAggregateService {
+
+    private final JpaTransferAggregateRepository transferRepository;
+    private final JpaShoppersRepository shopperRepository;
+    private final JpaMerchantsRepository merchantRepository;
+    private final YapilyClient yapilyClient;
+
+    /**
+     * We should discuss how we want to have such constraints handled. I think it should be within aggregate command
+     * handlers until it uses types/repositories/services from within same bounded context.
+     * <p>
+     * In this case we should build separate shopper repository in transfer context based on shopper events. (TODO)
+     * The same should happen to Merchant payee details (TODO)
+     */
+    public CreateTransferResponseDto createNewTransfer(AuthenticatedUser callingUser, CreateTransferRequestDto requestDto) {
+        // constraint 1 : shopper must exist
+        ShopperAggregate shopperAggregate = shopperRepository.findById(requestDto.getShopperId())
+                .orElseThrow(() -> new ShopperNotFoundException(requestDto.getShopperId()));
+
+        // constraint 2 : merchant must exist
+        MerchantAggregate merchantAggregate = merchantRepository.findById(requestDto.getMerchantId())
+                .orElseThrow(() -> new MerchantNotFoundException(requestDto.getMerchantId()));
+
+        // constraint 3 : merchant must have payee details properly configured
+        // TODO
+
+        TransferPayeeDetailsDto payeeDetailsDto = TransferPayeeDetailsDto.from(merchantAggregate.getMerchantPayeeDetails().toDto());
+
+        TransferAggregate transferAggregate = TransferAggregate.create(
+                callingUser,
+                requestDto.toCommand(
+                        shopperAggregate.getYapilyApplicationUserId(),
+                        shopperAggregate.getYapilyUserId(),
+                        payeeDetailsDto
+                ),
+                transferRepository
+        );
+
+        return CreateTransferResponseDto.fromAggregate(transferAggregate);
+    }
+
+    public GeneratePaymentAuthorizationUrlResponseDto generateAuthorizationUrl(AuthenticatedUser callingUser, GeneratePaymentAuthorizationUrlRequestDto requestDto) {
+        // constraint 1: transfer must exist and be in status = TODO
+        TransferAggregate transferAggregateBefore = transferRepository.findById(requestDto.getTransferId())
+                .orElseThrow(() -> new TransferNotFoundException(requestDto.getTransferId()));
+        // TODO: validate transfer status
+
+        GeneratePaymentAuthorizationUrlCommand generatePaymentAuthorizationUrlCommand = requestDto.toCommand();
+        TransferAggregate transferAggregateAfter =
+                transferAggregateBefore.handle(generatePaymentAuthorizationUrlCommand, transferRepository, yapilyClient);
+
+        return GeneratePaymentAuthorizationUrlResponseDto.fromAggregate(transferAggregateAfter);
+    }
+
+
+}
+
+@Value
+class GeneratePaymentAuthorizationUrlRequestDto {
+    private final TransferId transferId;
+
+    public GeneratePaymentAuthorizationUrlCommand toCommand() {
+        return new GeneratePaymentAuthorizationUrlCommand(
+                this.transferId
+        );
+    }
+}
+
+@Value
+class GeneratePaymentAuthorizationUrlResponseDto {
+    private final TransferId transferId;
+    private final String authorizationUrl;
+    private final String qrCodeUrl;
+
+    public static GeneratePaymentAuthorizationUrlResponseDto fromAggregate(TransferAggregate transferAggregateAfter) {
+        var event = DtoUtilities.getEvent(transferAggregateAfter, PaymentAuthorizationUrlCreatedEvent.class);
+        return new GeneratePaymentAuthorizationUrlResponseDto(
+                event.getTransferId(),
+                event.getAuthorizationUrl(),
+                event.getQrCodeUrl()
+        );
+    }
+}
+
 @Entity
 @Getter
 public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferId> {
     // external references
     private UserId shopperId;
     private UserId merchantId;
+    private YapilyApplicationUserId yapilyApplicationUserId;
+    private YapilyUserId yapilyUserId;
 
     // transfer details
     private BigDecimal amount;
@@ -139,6 +369,10 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
     @OneToOne(mappedBy = "transfer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private TransferPayeeDetailsEntity payee;
 
+    // consent details:
+    private LocalDateTime consentRequestedAt;
+    private InstitutionConsentId institutionConsentId;
+
     // other
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -150,7 +384,7 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
 
     public TransferAggregate(
             TransferId id,
-            UserId shopperId, UserId merchantId,
+            UserId shopperId, UserId merchantId, YapilyApplicationUserId yapilyApplicationUserId, YapilyUserId yapilyUserId,
             BigDecimal amount, String currency, String description, String reference,
             TransferIdempotencyId idempotencyId,
             InstitutionId institutionId,
@@ -160,6 +394,8 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
         super(id);
         this.shopperId = shopperId;
         this.merchantId = merchantId;
+        this.yapilyApplicationUserId = yapilyApplicationUserId;
+        this.yapilyUserId = yapilyUserId;
         this.amount = amount;
         this.currency = currency;
         this.description = description;
@@ -181,6 +417,8 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
                 TransferId.Companion.random(),
                 command.getShopperId(),
                 command.getMerchantId(),
+                command.getYapilyApplicationUserId(),
+                command.getYapilyUserId(),
                 command.getAmount(),
                 command.getCurrency(),
                 command.getDescription(),
@@ -190,6 +428,16 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
                 LocalDateTime.now(),
                 callingUser.getUserId()
         );
+
+        var transferPayeeDetailsEntity = new TransferPayeeDetailsEntity(
+                newTransfer.getId(),
+                command.getTransferPayeeDetails().getAccountHolderName(),
+                command.getTransferPayeeDetails().getPostalAddress().toDomain(),
+                command.getTransferPayeeDetails().getAccountIdentificationDto().get(0).toDomain(),
+                command.getTransferPayeeDetails().getAccountIdentificationDto().get(1).toDomain()
+        );
+
+        newTransfer.setTransferPayeeDetails(transferPayeeDetailsEntity);
 
         newTransfer.registerEvent(
                 new TransferCreatedEvent(
@@ -213,11 +461,48 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
         return newTransfer;
     }
 
+    public TransferAggregate handle(GeneratePaymentAuthorizationUrlCommand command, JpaTransferAggregateRepository repository, YapilyClient yapilyClient) {
+
+        PaymentRequest paymentRequest = yapilyClient.createPaymentRequest(
+                this.amount,
+                this.currency,
+                this.payee.getAccountHolderName(),
+                this.idempotencyId.toYapily(),
+                this.description,
+                List.of(this.payee.getAccountIdentification1().toYapily(), this.payee.getAccountIdentification2().toYapily())
+        );
+
+        var consentRequestedAt = LocalDateTime.now();
+        PaymentAuthorisationRequestResponse paymentAuthorisationRequestResponse = yapilyClient.generateAuthorizationUrl(
+                this.yapilyApplicationUserId,
+                this.institutionId.toYapily(),
+                paymentRequest,
+                "https://localhost:8080/api/callback/"
+        );
+
+        // update aggregate stat
+        this.consentRequestedAt = consentRequestedAt;
+        this.institutionConsentId = new InstitutionConsentId(paymentAuthorisationRequestResponse.getInstitutionConsentId());
+
+        // generate events
+        this.registerEvent(
+                new PaymentAuthorizationUrlCreatedEvent(
+                        this.getId(),
+                        paymentAuthorisationRequestResponse.getAuthorisationUrl(),
+                        paymentAuthorisationRequestResponse.getQrCodeUrl()
+                )
+        );
+
+        return this;
+    }
+
     public static TransferAggregate forTest() {
         var transfer = new TransferAggregate(
                 TransferId.Companion.random(),
                 UserId.Companion.random(),
                 UserId.Companion.random(),
+                YapilyApplicationUserId.Companion.random(),
+                YapilyUserId.Companion.random(),
                 BigDecimal.valueOf(10.00).setScale(2),
                 "GBP",
                 "test transfer description",

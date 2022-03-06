@@ -37,6 +37,21 @@ public class PostalAddressDto {
         );
     }
 
+    public static PostalAddressDto fromDomain(PostalAddressVO domain) {
+        return new PostalAddressDto(
+                domain.getAddressLine(),
+                domain.getAddressType(),
+                domain.getBuildingNumber(),
+                domain.getCountry(),
+                domain.getCounty(),
+                domain.getDepartment(),
+                domain.getPostCode(),
+                domain.getStreetName(),
+                domain.getSubDepartment(),
+                domain.getTownName()
+        );
+    }
+
     /**
      * Generates enough data for UK payee address
      *
