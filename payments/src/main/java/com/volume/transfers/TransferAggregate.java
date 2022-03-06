@@ -14,6 +14,7 @@ import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import yapily.sdk.ApiResponseOfPaymentResponse;
 import yapily.sdk.Consent;
 import yapily.sdk.PaymentAuthorisationRequestResponse;
 import yapily.sdk.PaymentRequest;
@@ -144,6 +145,24 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
         return newTransfer;
     }
 
+    public TransferAggregate handle(MakePaymentCommand command, YapilyClient yapilyClient) {
+        var statusUpdated = new TransactionStatusUpdater();
+        statusUpdated.updateTransferStatus(this, TransferStatus.STARTING_PAYMENT);
+
+        try {
+            ApiResponseOfPaymentResponse apiResponseOfPaymentResponse = yapilyClient.makePayment(this.consentToken, createPaymentRequest(yapilyClient));
+            statusUpdated.updateTransferStatus(this, TransferStatus.PAYMENT_SUCCEEDED);
+        } catch (Exception exception) {
+            statusUpdated.updateTransferStatus(this, TransferStatus.PAYMENT_FAILED);
+        }
+
+        registerEvent(
+                new PaymentMadeEvent(this.getId())
+        );
+
+        return this;
+    }
+
     static class TransactionStatusUpdater {
         @Transactional(propagation = Propagation.REQUIRES_NEW)
         protected void updateTransferStatus(TransferAggregate aggregate, TransferStatus status) {
@@ -184,9 +203,8 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
         return this;
     }
 
-    @NotNull
-    private PaymentAuthorisationRequestResponse requestAuthorizationUrl(GeneratePaymentAuthorizationUrlCommand command, YapilyClient yapilyClient) {
-        PaymentRequest paymentRequest = yapilyClient.createPaymentRequest(
+    private PaymentRequest createPaymentRequest(YapilyClient yapilyClient) {
+        return yapilyClient.createPaymentRequest(
                 this.amount,
                 this.currency,
                 this.payee.getAccountHolderName(),
@@ -195,6 +213,11 @@ public class TransferAggregate extends BaseKeyedVersionedAggregateRoot<TransferI
                 List.of(this.payee.getAccountIdentification1().toYapily(), this.payee.getAccountIdentification2().toYapily()),
                 false // TODO: add discovery of refund feature in a particular institution
         );
+    }
+
+    @NotNull
+    private PaymentAuthorisationRequestResponse requestAuthorizationUrl(GeneratePaymentAuthorizationUrlCommand command, YapilyClient yapilyClient) {
+        PaymentRequest paymentRequest = createPaymentRequest(yapilyClient);
         PaymentAuthorisationRequestResponse paymentAuthorisationRequestResponse = yapilyClient.generateAuthorizationUrl(
                 this.yapilyApplicationUserId,
                 this.institutionId.toYapily(),

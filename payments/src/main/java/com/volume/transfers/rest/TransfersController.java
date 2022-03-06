@@ -45,11 +45,21 @@ public class TransfersController {
     @GetMapping("/api/callback/")
     ResponseEntity callback(@RequestParam("one-time-token") String oneTimeTokenString, @RequestParam("transferId") String transferIdString) {
         var transferId = TransferId.Companion.fromString(transferIdString);
-        transferAggregateService.handleAuthorizationCallback(
+        HandleAuthorizationCallbackResponseDto handleAuthorizationCallbackResponseDto = transferAggregateService.handleAuthorizationCallback(
                 AuthenticatedUser.merchant(),
                 new HandleAuthorizationCallbackRequestDto(transferId, oneTimeTokenString));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(handleAuthorizationCallbackResponseDto);
+    }
+
+    @PostMapping("/api/transfers/{transferId}/make-payment")
+    ResponseEntity<MakePaymentResponseDto> makePayment(@PathVariable("transferId") String transferIdString, @RequestBody MakePaymentRequestDto requestDto) {
+        var transferId = TransferId.Companion.fromString(transferIdString);
+        MakePaymentResponseDto makePaymentResponseDto = transferAggregateService.makePayment(
+                AuthenticatedUser.merchant(),
+                requestDto);
+
+        return ResponseEntity.ok().body(makePaymentResponseDto);
     }
 
 }

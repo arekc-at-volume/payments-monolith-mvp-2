@@ -1,10 +1,10 @@
 package com.volume.transfers;
 
-import com.volume.shared.domain.messages.GeneratePaymentAuthorizationUrlCommand;
-import com.volume.transfers.persistence.JpaTransferAggregateRepository;
-import com.volume.transfers.rest.dto.TransferDto;
-import com.volume.transfers.rest.dto.*;
 import com.volume.shared.domain.AuthenticatedUser;
+import com.volume.shared.domain.messages.GeneratePaymentAuthorizationUrlCommand;
+import com.volume.shared.domain.messages.PaymentMadeEvent;
+import com.volume.transfers.persistence.JpaTransferAggregateRepository;
+import com.volume.transfers.rest.dto.*;
 import com.volume.users.MerchantAggregate;
 import com.volume.users.ShopperAggregate;
 import com.volume.users.exceptions.MerchantNotFoundException;
@@ -14,7 +14,6 @@ import com.volume.users.persistence.JpaMerchantsRepository;
 import com.volume.users.persistence.JpaShoppersRepository;
 import com.volume.yapily.YapilyClient;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -103,6 +102,21 @@ public class TransferAggregateService {
                         .stream()
                         .map(TransferAggregate::toDto)
                         .collect(Collectors.toList());
+    }
+
+    public MakePaymentResponseDto makePayment(AuthenticatedUser merchant, MakePaymentRequestDto requestDto) {
+        // constraint 1 : payment exists and is in proper status
+        TransferAggregate transferAggregateBefore = transferRepository.findById(requestDto.getTransferId())
+                .orElseThrow(() -> new TransferNotFoundException(requestDto.getTransferId()));
+        // TODO: validate transfer status
+        var command = requestDto.toCommand();
+        var transferAggregateAfter = transferAggregateBefore.runOnAggregate(
+                command,
+                transferAggregateBefore::handle,
+                transferRepository, yapilyClient
+        );
+
+        return PaymentMadeEvent.fromAggregate(transferAggregateAfter);
     }
 }
 
