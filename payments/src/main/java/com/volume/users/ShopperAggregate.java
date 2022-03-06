@@ -1,5 +1,6 @@
 package com.volume.users;
 
+import com.volume.shared.domain.AuthenticatedUser;
 import com.volume.shared.domain.messages.CreateShopperCommand;
 import com.volume.shared.domain.messages.ShopperCreatedEvent;
 import com.volume.shared.domain.types.UserId;
@@ -14,7 +15,6 @@ import lombok.Getter;
 import yapily.sdk.ApplicationUser;
 
 import javax.persistence.*;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;

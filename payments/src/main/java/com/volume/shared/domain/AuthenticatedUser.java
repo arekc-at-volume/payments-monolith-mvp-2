@@ -1,9 +1,7 @@
-package com.volume.users;
+package com.volume.shared.domain;
 
 import com.volume.shared.domain.types.UserId;
 import lombok.Value;
-
-import java.util.UUID;
 
 @Value
 public class AuthenticatedUser {

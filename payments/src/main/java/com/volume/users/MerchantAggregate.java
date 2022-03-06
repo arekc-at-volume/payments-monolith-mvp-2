@@ -1,6 +1,7 @@
 package com.volume.users;
 
 import com.google.common.base.Preconditions;
+import com.volume.shared.domain.AuthenticatedUser;
 import com.volume.shared.domain.messages.CreateMerchantCommand;
 import com.volume.shared.domain.messages.MerchantCreatedEvent;
 import com.volume.shared.domain.types.EmailAddress;

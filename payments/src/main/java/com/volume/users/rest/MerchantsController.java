@@ -6,7 +6,7 @@ import com.volume.shared.domain.types.DeviceId;
 import com.volume.shared.domain.types.UserId;
 import com.volume.shared.infrastructure.rest.RestErrorResponse;
 import com.volume.shared.infrastructure.rest.dto.DtoUtilities;
-import com.volume.users.AuthenticatedUser;
+import com.volume.shared.domain.AuthenticatedUser;
 import com.volume.users.MerchantAggregate;
 import com.volume.users.ShopperAggregate;
 import com.volume.users.exceptions.MerchantNotFoundException;

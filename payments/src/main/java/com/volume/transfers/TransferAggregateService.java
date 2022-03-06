@@ -3,7 +3,7 @@ package com.volume.transfers;
 import com.volume.shared.domain.messages.GeneratePaymentAuthorizationUrlCommand;
 import com.volume.transfers.persistence.JpaTransferAggregateRepository;
 import com.volume.transfers.rest.dto.*;
-import com.volume.users.AuthenticatedUser;
+import com.volume.shared.domain.AuthenticatedUser;
 import com.volume.users.MerchantAggregate;
 import com.volume.users.ShopperAggregate;
 import com.volume.users.exceptions.MerchantNotFoundException;

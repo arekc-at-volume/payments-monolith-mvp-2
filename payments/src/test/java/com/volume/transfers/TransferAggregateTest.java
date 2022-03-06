@@ -4,7 +4,7 @@ import com.volume.transfers.persistence.JpaTransferAggregateRepository;
 import com.volume.transfers.rest.dto.CreateTransferRequestDto;
 import com.volume.transfers.rest.dto.CreateTransferResponseDto;
 import com.volume.transfers.rest.dto.GeneratePaymentAuthorizationUrlRequestDto;
-import com.volume.users.AuthenticatedUser;
+import com.volume.shared.domain.AuthenticatedUser;
 import com.volume.users.MerchantAggregate;
 import com.volume.users.ShopperAggregate;
 import org.junit.jupiter.api.BeforeAll;

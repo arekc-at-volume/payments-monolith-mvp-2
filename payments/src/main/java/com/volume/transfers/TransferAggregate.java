@@ -1,23 +1,15 @@
 package com.volume.transfers;
 
+import com.volume.shared.domain.AuthenticatedUser;
 import com.volume.shared.domain.messages.*;
 import com.volume.shared.domain.types.*;
 import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedAggregateRoot;
-import com.volume.shared.infrastructure.persistence.BaseKeyedVersionedEntity;
 import com.volume.transfers.persistence.JpaTransferAggregateRepository;
-import com.volume.transfers.rest.dto.*;
-import com.volume.users.*;
-import com.volume.users.exceptions.MerchantNotFoundException;
-import com.volume.users.exceptions.ShopperNotFoundException;
-import com.volume.users.exceptions.TransferNotFoundException;
-import com.volume.users.persistence.JpaMerchantsRepository;
-import com.volume.users.persistence.JpaShoppersRepository;
 import com.volume.yapily.YapilyApplicationUserId;
 import com.volume.yapily.YapilyClient;
 import com.volume.yapily.YapilyInstitutionId;
 import com.volume.yapily.YapilyUserId;
 import lombok.*;
-import org.springframework.stereotype.Service;
 import yapily.sdk.PaymentAuthorisationRequestResponse;
 import yapily.sdk.PaymentRequest;
 
