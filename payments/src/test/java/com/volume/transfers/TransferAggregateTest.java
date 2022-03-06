@@ -1,5 +1,9 @@
 package com.volume.transfers;
 
+import com.volume.transfers.persistence.JpaTransferAggregateRepository;
+import com.volume.transfers.rest.dto.CreateTransferRequestDto;
+import com.volume.transfers.rest.dto.CreateTransferResponseDto;
+import com.volume.transfers.rest.dto.GeneratePaymentAuthorizationUrlRequestDto;
 import com.volume.users.AuthenticatedUser;
 import com.volume.users.MerchantAggregate;
 import com.volume.users.ShopperAggregate;
@@ -18,7 +22,8 @@ import static org.hibernate.testing.transaction.TransactionUtil.doInJPA;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TransferAggregateTest {
 
-    @Autowired JpaTransferAggregateRepository transferRepository;
+    @Autowired
+    JpaTransferAggregateRepository transferRepository;
     @Autowired TransferAggregateService transferService;
     @Autowired EntityManagerFactory emf;
     private ShopperAggregate shopperAggregate;

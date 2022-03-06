@@ -1,5 +1,6 @@
 package com.volume.transfers;
 
+import com.volume.transfers.persistence.JpaTransferAggregateRepository;
 import com.volume.users.AccountIdentificationVO;
 import com.volume.users.PostalAddressVO;
 import org.junit.jupiter.api.Test;
